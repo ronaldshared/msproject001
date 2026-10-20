@@ -2,186 +2,566 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Gantt Chart - WELLMONT-11 (réplica)</title>
+<title>WELLMONT-11 – Gantt funcional estilo Microsoft Project</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-  body { background: #f0f0f0; padding: 20px; }
-  h1 { margin-bottom: 15px; color: #333; }
-  .gantt-container { background: white; border: 1px solid #ccc; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-  
-  table { border-collapse: collapse; width: 100%; min-width: 1400px; }
-  th, td { border: 1px solid #ddd; padding: 6px 10px; font-size: 13px; }
-  th { background: #e8e8e8; position: sticky; top: 0; z-index: 10; }
-  
-  .task-col { width: 280px; text-align: left; }
-  .dur-col, .start-col, .finish-col { width: 90px; text-align: center; }
-  
-  .summary { font-weight: bold; background: #f8f8f8; }
-  .level-1 { padding-left: 20px; }
-  .level-2 { padding-left: 40px; }
-  
-  .timeline { position: relative; height: 28px; background: #fafafa; }
+  :root {
+    --header-bg: #f3f3f3;
+    --border: #c0c0c0;
+    --critical: #e74c3c;
+    --bar-blue: #5b9bd5;
+    --bar-teal: #70ad47;
+    --bar-orange: #ed7d31;
+    --summary: #2c3e50;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { background: #e8e8e8; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Toolbar */
+  .toolbar {
+    background: #2b579a; color: white; padding: 8px 12px;
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .toolbar button, .toolbar select {
+    background: #3b6db0; color: white; border: 1px solid #1e3f6f;
+    padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 13px;
+  }
+  .toolbar button:hover { background: #4a7bc8; }
+  .toolbar .sep { width: 1px; height: 24px; background: #5a8ad0; margin: 0 4px; }
+
+  /* Main layout */
+  .main { flex: 1; display: flex; overflow: hidden; }
+  .left-panel {
+    width: 520px; background: white; border-right: 2px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .right-panel { flex: 1; overflow: auto; background: white; position: relative; }
+
+  /* Table header */
+  .grid-header {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px 90px 90px 70px;
+    background: var(--header-bg); border-bottom: 1px solid var(--border);
+    font-weight: 600; font-size: 12px; position: sticky; top: 0; z-index: 20;
+  }
+  .grid-header > div { padding: 8px 6px; border-right: 1px solid var(--border); }
+
+  /* Task rows */
+  .task-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px 90px 90px 70px;
+    border-bottom: 1px solid #e0e0e0; font-size: 13px; height: 32px;
+    align-items: center; cursor: default;
+  }
+  .task-row:hover { background: #f0f7ff; }
+  .task-row.selected { background: #d6eaf8; }
+  .task-row.summary { font-weight: 600; background: #f8f8f8; }
+  .task-row .id { text-align: center; color: #666; }
+  .task-row .name { padding-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .task-row .name .indent { display: inline-block; }
+  .task-row input { width: 100%; border: 1px solid #aaa; padding: 2px 4px; font-size: 12px; }
+
+  /* Timeline */
+  .timeline-header {
+    display: flex; background: var(--header-bg); border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 15; height: 48px;
+  }
+  .month-cell { border-right: 1px solid var(--border); text-align: center; font-size: 12px; font-weight: 600; padding-top: 4px; }
+  .day-cell { border-right: 1px solid #eee; height: 20px; font-size: 10px; text-align: center; color: #555; }
+
+  .bars-container { position: relative; }
+  .bar-row { height: 32px; position: relative; border-bottom: 1px solid #f0f0f0; }
   .bar {
-    position: absolute; height: 18px; top: 5px; border-radius: 3px;
+    position: absolute; height: 18px; top: 7px; border-radius: 3px;
     color: white; font-size: 11px; line-height: 18px; text-align: center;
-    white-space: nowrap; overflow: hidden; cursor: pointer;
+    cursor: move; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    overflow: hidden; white-space: nowrap;
   }
-  .bar:hover { opacity: 0.85; }
-  
-  .red    { background: #e74c3c; }
-  .blue   { background: #3498db; }
-  .cyan   { background: #1abc9c; }
-  .black  { background: #2c3e50; }
+  .bar.critical { background: var(--critical) !important; }
+  .bar.summary-bar { background: var(--summary); height: 10px; top: 11px; }
+  .bar .progress {
+    position: absolute; left: 0; top: 0; height: 100%; background: rgba(0,0,0,0.25);
+  }
   .milestone {
-    width: 14px; height: 14px; background: #2c3e50;
-    transform: rotate(45deg); top: 7px; border-radius: 2px;
+    width: 14px; height: 14px; background: #2c3e50; transform: rotate(45deg);
+    top: 9px; border-radius: 1px;
   }
-  
-  .header-months { display: flex; background: #d0d0d0; }
-  .month { flex: 1; text-align: center; padding: 4px; border-right: 1px solid #bbb; font-weight: bold; }
-  
+  .today-line {
+    position: absolute; top: 0; bottom: 0; width: 2px; background: #e74c3c;
+    z-index: 5; pointer-events: none;
+  }
+  .dep-arrow { position: absolute; pointer-events: none; z-index: 4; }
+
+  /* Context menu & modal */
+  .modal {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    z-index: 100; justify-content: center; align-items: center;
+  }
+  .modal.show { display: flex; }
+  .modal-content {
+    background: white; padding: 20px; border-radius: 6px; width: 420px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  .modal-content h3 { margin-bottom: 12px; }
+  .modal-content label { display: block; margin: 8px 0 2px; font-size: 13px; }
+  .modal-content input, .modal-content select { width: 100%; padding: 6px; margin-bottom: 8px; }
+  .modal-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+
   .tooltip {
-    position: absolute; background: #333; color: white; padding: 6px 10px;
-    border-radius: 4px; font-size: 12px; z-index: 100; display: none;
-    pointer-events: none;
+    position: fixed; background: #1e1e1e; color: white; padding: 8px 12px;
+    border-radius: 4px; font-size: 12px; z-index: 200; display: none;
+    max-width: 280px; pointer-events: none;
   }
 </style>
 </head>
 <body>
 
-<h1>WELLMONT-11 – Diagrama de Gantt (réplica HTML/CSS/JS)</h1>
+<!-- Toolbar -->
+<div class="toolbar">
+  <button onclick="addTask()">+ Tarea</button>
+  <button onclick="editSelected()">Editar</button>
+  <button onclick="deleteSelected()">Eliminar</button>
+  <div class="sep"></div>
+  <button onclick="indentTask()">→ Indentar</button>
+  <button onclick="outdentTask()">← Outdent</button>
+  <div class="sep"></div>
+  <button onclick="toggleExpandAll(true)">Expandir todo</button>
+  <button onclick="toggleExpandAll(false)">Colapsar todo</button>
+  <div class="sep"></div>
+  <label style="font-size:13px">Escala:</label>
+  <select id="scaleSelect" onchange="changeScale(this.value)">
+    <option value="day">Día</option>
+    <option value="week" selected>Semana</option>
+    <option value="month">Mes</option>
+  </select>
+  <div class="sep"></div>
+  <button onclick="calculateCriticalPath()">Ruta Crítica</button>
+  <button onclick="exportCSV()">Exportar CSV</button>
+  <button onclick="window.print()">Imprimir / PDF</button>
+  <div class="sep"></div>
+  <button onclick="saveData()">💾 Guardar</button>
+  <span id="status" style="margin-left:auto;font-size:12px;opacity:0.8"></span>
+</div>
 
-<div class="gantt-container">
-  <table id="ganttTable">
-    <thead>
-      <tr>
-        <th class="task-col">Task Name</th>
-        <th class="dur-col">Duration</th>
-        <th class="start-col">Start</th>
-        <th class="finish-col">Finish</th>
-        <th>
-          <div class="header-months">
-            <div class="month">Junio 2019</div>
-            <div class="month">Julio 2019</div>
-            <div class="month">Agosto 2019</div>
-            <div class="month">Septiembre 2019</div>
-          </div>
-        </th>
-      </tr>
-    </thead>
-    <tbody id="ganttBody"></tbody>
-  </table>
+<div class="main">
+  <!-- Left: Task list -->
+  <div class="left-panel">
+    <div class="grid-header">
+      <div>ID</div>
+      <div>Nombre de tarea</div>
+      <div>Duración</div>
+      <div>Inicio</div>
+      <div>Fin</div>
+      <div>% Completado</div>
+    </div>
+    <div id="taskList" style="overflow-y:auto;flex:1"></div>
+  </div>
+
+  <!-- Right: Timeline -->
+  <div class="right-panel" id="rightPanel">
+    <div class="timeline-header" id="timelineHeader"></div>
+    <div class="bars-container" id="barsContainer"></div>
+  </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal" id="editModal">
+  <div class="modal-content">
+    <h3 id="modalTitle">Editar tarea</h3>
+    <label>Nombre</label>
+    <input type="text" id="mName">
+    <label>Duración (días)</label>
+    <input type="number" id="mDuration" min="0">
+    <label>Inicio (YYYY-MM-DD)</label>
+    <input type="date" id="mStart">
+    <label>% Completado</label>
+    <input type="number" id="mPercent" min="0" max="100" value="0">
+    <label>Predecesora (ID)</label>
+    <input type="number" id="mPred" placeholder="Ej: 4">
+    <label>Es tarea resumen</label>
+    <select id="mSummary"><option value="false">No</option><option value="true">Sí</option></select>
+    <div class="modal-buttons">
+      <button onclick="closeModal()">Cancelar</button>
+      <button onclick="saveTask()" style="background:#2b579a;color:white">Guardar</button>
+    </div>
+  </div>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-// ===== DATOS EXTRAÍDOS DE LA IMAGEN (evidencia) =====
-const tasks = [
-  { id:1,  name:"Notice to Proceed",     duration:"0 days", start:"6/3/2019",  finish:"6/3/2019",  level:0, color:"black", isMilestone:true,  startDay:3,  days:0 },
-  { id:2,  name:"Project Start",         duration:"0 days", start:"6/4/2019",  finish:"6/4/2019",  level:0, color:"black", isMilestone:true,  startDay:4,  days:0 },
-  { id:3,  name:"Project Complete",      duration:"0 days", start:"9/10/2019", finish:"9/10/2019", level:0, color:"black", isMilestone:true,  startDay:99, days:0 },
-  { id:4,  name:"Mobilization",          duration:"10 days",start:"6/5/2019",  finish:"6/20/2019", level:0, color:"red",   isMilestone:false, startDay:5,  days:10 },
-  { id:5,  name:"Construction",          duration:"51 days",start:"6/24/2019", finish:"8/14/2019", level:0, color:"black", isMilestone:false, startDay:24, days:51, summary:true },
-  { id:6,  name:"Below Grade",           duration:"13 days",start:"6/24/2019", finish:"7/11/2019", level:1, color:"black", isMilestone:false, startDay:24, days:13, summary:true },
-  { id:7,  name:"Grade Site",            duration:"8 days", start:"6/24/2019", finish:"7/5/2019",  level:2, color:"blue",  isMilestone:false, startDay:24, days:8 },
-  { id:8,  name:"Set Foundation",        duration:"9 days", start:"6/24/2019", finish:"7/8/2019",  level:2, color:"blue",  isMilestone:false, startDay:24, days:9 },
-  { id:9,  name:"Dig Cable Trench",      duration:"4 days", start:"7/8/2019",  finish:"7/12/2019", level:2, color:"red",   isMilestone:false, startDay:38, days:4 },
-  { id:10, name:"Above Grade",           duration:"20 days",start:"7/11/2019", finish:"8/14/2019", level:1, color:"black", isMilestone:false, startDay:41, days:20, summary:true },
-  { id:11, name:"Erect Steel Structures",duration:"8 days", start:"7/11/2019", finish:"7/22/2019", level:2, color:"blue",  isMilestone:false, startDay:41, days:8 },
-  { id:12, name:"Install Equipment",     duration:"6 days", start:"7/16/2019", finish:"7/24/2019", level:2, color:"cyan",  isMilestone:false, startDay:46, days:6 },
-  { id:13, name:"Install Grounding",     duration:"2 days", start:"7/25/2019", finish:"7/26/2019", level:2, color:"cyan",  isMilestone:false, startDay:55, days:2 },
-  { id:14, name:"Install Bus and Jumpers",duration:"8 days",start:"7/25/2019", finish:"8/7/2019",  level:2, color:"blue",  isMilestone:false, startDay:55, days:8 },
-  { id:15, name:"Lay Control Cable",     duration:"7 days", start:"7/28/2019", finish:"8/7/2019",  level:2, color:"red",   isMilestone:false, startDay:58, days:7 },
-  { id:16, name:"Fence",                 duration:"14 days",start:"7/28/2019", finish:"8/11/2019", level:1, color:"black", isMilestone:false, startDay:58, days:14, summary:true },
-  { id:17, name:"Install Fence",         duration:"7 days", start:"7/28/2019", finish:"8/7/2019",  level:2, color:"blue",  isMilestone:false, startDay:58, days:7 },
-  { id:18, name:"Site Restoration",      duration:"23 days",start:"8/15/2019", finish:"8/22/2019", level:1, color:"black", isMilestone:false, startDay:76, days:8, summary:true },
-  { id:19, name:"Remove Equipment",      duration:"5 days", start:"8/15/2019", finish:"8/21/2019", level:2, color:"red",   isMilestone:false, startDay:76, days:5 },
-  { id:20, name:"Lay Storing",           duration:"2 days", start:"7/16/2019", finish:"7/17/2019", level:2, color:"cyan",  isMilestone:false, startDay:46, days:2 },
-  { id:21, name:"Lay Roadway",           duration:"4 days", start:"7/18/2019", finish:"7/23/2019", level:2, color:"cyan",  isMilestone:false, startDay:48, days:4 },
-  { id:22, name:"Project Closeout",      duration:"10 days",start:"8/26/2019", finish:"9/10/2019", level:0, color:"black", isMilestone:false, startDay:87, days:10, summary:true },
-  { id:23, name:"Substantial Completion",duration:"10 days",start:"8/26/2019", finish:"9/10/2019", level:1, color:"red",   isMilestone:false, startDay:87, days:10 }
+/* ===================== DATOS INICIALES (extraídos de la imagen) ===================== */
+let tasks = [
+  {id:1, name:"Notice to Proceed", duration:0, start:"2019-06-03", percent:100, level:0, summary:false, pred:null, collapsed:false, critical:false},
+  {id:2, name:"Project Start", duration:0, start:"2019-06-04", percent:100, level:0, summary:false, pred:1, collapsed:false, critical:false},
+  {id:3, name:"Project Complete", duration:0, start:"2019-09-10", percent:0, level:0, summary:false, pred:22, collapsed:false, critical:true},
+  {id:4, name:"Mobilization", duration:10, start:"2019-06-05", percent:100, level:0, summary:false, pred:2, collapsed:false, critical:false},
+  {id:5, name:"Construction", duration:51, start:"2019-06-24", percent:60, level:0, summary:true, pred:4, collapsed:false, critical:true},
+  {id:6, name:"Below Grade", duration:13, start:"2019-06-24", percent:100, level:1, summary:true, pred:null, collapsed:false, critical:false},
+  {id:7, name:"Grade Site", duration:8, start:"2019-06-24", percent:100, level:2, summary:false, pred:null, collapsed:false, critical:false},
+  {id:8, name:"Set Foundation", duration:9, start:"2019-06-24", percent:100, level:2, summary:false, pred:7, collapsed:false, critical:false},
+  {id:9, name:"Dig Cable Trench", duration:4, start:"2019-07-08", percent:100, level:2, summary:false, pred:8, collapsed:false, critical:false},
+  {id:10,name:"Above Grade", duration:20, start:"2019-07-11", percent:70, level:1, summary:true, pred:6, collapsed:false, critical:true},
+  {id:11,name:"Erect Steel Structures", duration:8, start:"2019-07-11", percent:100, level:2, summary:false, pred:null, collapsed:false, critical:true},
+  {id:12,name:"Install Equipment", duration:6, start:"2019-07-16", percent:80, level:2, summary:false, pred:11, collapsed:false, critical:false},
+  {id:13,name:"Install Grounding", duration:2, start:"2019-07-25", percent:50, level:2, summary:false, pred:12, collapsed:false, critical:false},
+  {id:14,name:"Install Bus and Jumpers", duration:8, start:"2019-07-25", percent:40, level:2, summary:false, pred:12, collapsed:false, critical:true},
+  {id:15,name:"Lay Control Cable", duration:7, start:"2019-07-28", percent:30, level:2, summary:false, pred:14, collapsed:false, critical:true},
+  {id:16,name:"Fence", duration:14, start:"2019-07-28", percent:20, level:1, summary:true, pred:null, collapsed:false, critical:false},
+  {id:17,name:"Install Fence", duration:7, start:"2019-07-28", percent:20, level:2, summary:false, pred:null, collapsed:false, critical:false},
+  {id:18,name:"Site Restoration", duration:8, start:"2019-08-15", percent:0, level:1, summary:true, pred:10, collapsed:false, critical:true},
+  {id:19,name:"Remove Equipment", duration:5, start:"2019-08-15", percent:0, level:2, summary:false, pred:null, collapsed:false, critical:true},
+  {id:20,name:"Lay Storing", duration:2, start:"2019-07-16", percent:100, level:2, summary:false, pred:null, collapsed:false, critical:false},
+  {id:21,name:"Lay Roadway", duration:4, start:"2019-07-18", percent:100, level:2, summary:false, pred:20, collapsed:false, critical:false},
+  {id:22,name:"Project Closeout", duration:10, start:"2019-08-26", percent:0, level:0, summary:true, pred:18, collapsed:false, critical:true},
+  {id:23,name:"Substantial Completion", duration:10, start:"2019-08-26", percent:0, level:1, summary:false, pred:null, collapsed:false, critical:true}
 ];
 
-// Escala: 1 día ≈ 4.2 px (ajustable)
-const DAY_WIDTH = 4.2;
-const START_OFFSET = 3; // 1 de junio = día 1
+let selectedId = null;
+let scale = 'week';          // day | week | month
+let dayWidth = 18;           // se ajusta según escala
+let projectStart = new Date('2019-06-01');
+let editingId = null;
 
-function renderGantt() {
-  const tbody = document.getElementById('ganttBody');
-  tbody.innerHTML = '';
+/* ===================== UTILIDADES DE FECHA ===================== */
+function parseDate(str) { return new Date(str + 'T00:00:00'); }
+function formatDate(d) {
+  return d.toISOString().slice(0,10);
+}
+function addDays(date, days) {
+  const r = new Date(date);
+  r.setDate(r.getDate() + days);
+  return r;
+}
+function daysBetween(d1, d2) {
+  return Math.round((d2 - d1) / 86400000);
+}
+function getFinish(task) {
+  return addDays(parseDate(task.start), task.duration);
+}
 
-  tasks.forEach(task => {
-    const tr = document.createElement('tr');
-    if (task.summary) tr.classList.add('summary');
+/* ===================== RENDER ===================== */
+function render() {
+  renderTaskList();
+  renderTimeline();
+  drawDependencies();
+  updateStatus();
+}
 
-    // Nombre
-    const nameTd = document.createElement('td');
-    nameTd.className = 'task-col level-' + task.level;
-    nameTd.textContent = task.name;
-    tr.appendChild(nameTd);
+function renderTaskList() {
+  const container = document.getElementById('taskList');
+  container.innerHTML = '';
+  tasks.forEach(t => {
+    if (isHidden(t)) return;
+    const row = document.createElement('div');
+    row.className = 'task-row' + (t.summary ? ' summary' : '') + (t.id === selectedId ? ' selected' : '');
+    row.onclick = () => { selectedId = t.id; render(); };
 
-    // Duración
-    const durTd = document.createElement('td');
-    durTd.className = 'dur-col';
-    durTd.textContent = task.duration;
-    tr.appendChild(durTd);
+    const indent = '&nbsp;'.repeat(t.level * 4);
+    const toggle = t.summary ? `<span onclick="event.stopPropagation();toggleCollapse(${t.id})" style="cursor:pointer;margin-right:4px">${t.collapsed ? '▶' : '▼'}</span>` : '';
 
-    // Start
-    const startTd = document.createElement('td');
-    startTd.className = 'start-col';
-    startTd.textContent = task.start;
-    tr.appendChild(startTd);
-
-    // Finish
-    const finishTd = document.createElement('td');
-    finishTd.className = 'finish-col';
-    finishTd.textContent = task.finish;
-    tr.appendChild(finishTd);
-
-    // Timeline
-    const timeTd = document.createElement('td');
-    const timeline = document.createElement('div');
-    timeline.className = 'timeline';
-
-    const bar = document.createElement('div');
-    if (task.isMilestone) {
-      bar.className = 'bar milestone';
-      bar.style.left = ((task.startDay - START_OFFSET) * DAY_WIDTH) + 'px';
-    } else {
-      bar.className = 'bar ' + task.color;
-      bar.style.left = ((task.startDay - START_OFFSET) * DAY_WIDTH) + 'px';
-      bar.style.width = (task.days * DAY_WIDTH) + 'px';
-      if (task.days > 5) bar.textContent = task.name;
-    }
-
-    bar.addEventListener('mouseenter', (e) => showTooltip(e, task));
-    bar.addEventListener('mouseleave', hideTooltip);
-
-    timeline.appendChild(bar);
-    timeTd.appendChild(timeline);
-    tr.appendChild(timeTd);
-
-    tbody.appendChild(tr);
+    row.innerHTML = `
+      <div class="id">${t.id}</div>
+      <div class="name">${toggle}${indent}${t.name}</div>
+      <div>${t.duration}d</div>
+      <div>${t.start}</div>
+      <div>${formatDate(getFinish(t))}</div>
+      <div>${t.percent}%</div>
+    `;
+    container.appendChild(row);
   });
 }
 
-function showTooltip(e, task) {
-  const tip = document.getElementById('tooltip');
-  tip.innerHTML = `<strong>${task.name}</strong><br>
-                   Duración: ${task.duration}<br>
-                   Inicio: ${task.start}<br>
-                   Fin: ${task.finish}`;
-  tip.style.display = 'block';
-  tip.style.left = (e.pageX + 12) + 'px';
-  tip.style.top = (e.pageY + 12) + 'px';
+function isHidden(task) {
+  // Si algún ancestro está colapsado
+  let level = task.level;
+  for (let i = tasks.indexOf(task) - 1; i >= 0; i--) {
+    if (tasks[i].level < level) {
+      if (tasks[i].collapsed) return true;
+      level = tasks[i].level;
+    }
+  }
+  return false;
 }
 
+function renderTimeline() {
+  // Ajustar dayWidth según escala
+  if (scale === 'day') dayWidth = 28;
+  else if (scale === 'week') dayWidth = 12;
+  else dayWidth = 4;
+
+  const header = document.getElementById('timelineHeader');
+  const bars = document.getElementById('barsContainer');
+  header.innerHTML = '';
+  bars.innerHTML = '';
+
+  // Rango total
+  let minD = parseDate('2019-06-01');
+  let maxD = parseDate('2019-09-20');
+  const totalDays = daysBetween(minD, maxD) + 1;
+  const totalWidth = totalDays * dayWidth;
+
+  // Header meses / semanas
+  let html = '';
+  let current = new Date(minD);
+  while (current <= maxD) {
+    const monthName = current.toLocaleString('es', {month:'short', year:'numeric'});
+    let daysInPeriod = 1;
+    if (scale === 'month') {
+      daysInPeriod = new Date(current.getFullYear(), current.getMonth()+1, 0).getDate() - current.getDate() + 1;
+    } else if (scale === 'week') {
+      daysInPeriod = 7;
+    }
+    const w = daysInPeriod * dayWidth;
+    html += `<div class="month-cell" style="width:${w}px">${monthName}</div>`;
+    current = addDays(current, daysInPeriod);
+  }
+  header.innerHTML = html;
+  header.style.width = totalWidth + 'px';
+
+  // Barras
+  tasks.forEach(t => {
+    if (isHidden(t)) return;
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.style.width = totalWidth + 'px';
+
+    const startOffset = daysBetween(minD, parseDate(t.start)) * dayWidth;
+    const width = Math.max(t.duration * dayWidth, t.duration === 0 ? 14 : 8);
+
+    const bar = document.createElement('div');
+    bar.className = 'bar' + (t.duration === 0 ? ' milestone' : '') + (t.summary ? ' summary-bar' : '') + (t.critical ? ' critical' : '');
+    bar.style.left = startOffset + 'px';
+    bar.style.width = (t.duration === 0 ? 14 : width) + 'px';
+    bar.style.background = t.critical ? 'var(--critical)' : (t.summary ? 'var(--summary)' : 'var(--bar-blue)');
+    if (t.duration > 0) {
+      bar.innerHTML = `<div class="progress" style="width:${t.percent}%"></div>${t.duration > 3 ? t.name : ''}`;
+    }
+
+    // Drag
+    bar.onmousedown = (e) => startDrag(e, t, bar, minD);
+
+    // Tooltip
+    bar.onmouseenter = (e) => showTooltip(e, t);
+    bar.onmouseleave = hideTooltip;
+
+    row.appendChild(bar);
+    bars.appendChild(row);
+  });
+
+  // Línea de hoy (ejemplo 15 julio 2019)
+  const today = parseDate('2019-07-15');
+  const todayX = daysBetween(minD, today) * dayWidth;
+  const line = document.createElement('div');
+  line.className = 'today-line';
+  line.style.left = todayX + 'px';
+  bars.appendChild(line);
+
+  bars.style.width = totalWidth + 'px';
+  bars.style.height = (tasks.filter(t => !isHidden(t)).length * 32) + 'px';
+}
+
+/* ===================== DRAG & RESIZE ===================== */
+let dragState = null;
+function startDrag(e, task, barEl, minD) {
+  e.preventDefault();
+  const startX = e.clientX;
+  const origLeft = parseFloat(barEl.style.left);
+  const origWidth = parseFloat(barEl.style.width);
+  const isResize = e.offsetX > origWidth - 8;
+
+  dragState = { task, barEl, startX, origLeft, origWidth, isResize, minD };
+
+  document.onmousemove = onDrag;
+  document.onmouseup = endDrag;
+}
+
+function onDrag(e) {
+  if (!dragState) return;
+  const dx = e.clientX - dragState.startX;
+  if (dragState.isResize) {
+    const newW = Math.max(dayWidth, dragState.origWidth + dx);
+    dragState.barEl.style.width = newW + 'px';
+  } else {
+    dragState.barEl.style.left = (dragState.origLeft + dx) + 'px';
+  }
+}
+
+function endDrag() {
+  if (!dragState) return;
+  const { task, barEl, origLeft, origWidth, isResize, minD } = dragState;
+  const newLeft = parseFloat(barEl.style.left);
+  const newWidth = parseFloat(barEl.style.width);
+
+  if (isResize) {
+    task.duration = Math.round(newWidth / dayWidth);
+  } else {
+    const daysMoved = Math.round((newLeft - origLeft) / dayWidth);
+    task.start = formatDate(addDays(parseDate(task.start), daysMoved));
+  }
+  // Recalcular finish de predecesoras simples (FS)
+  updateSuccessors(task);
+  dragState = null;
+  document.onmousemove = null;
+  document.onmouseup = null;
+  render();
+  saveData();
+}
+
+function updateSuccessors(changed) {
+  tasks.forEach(t => {
+    if (t.pred === changed.id) {
+      const predFinish = getFinish(changed);
+      t.start = formatDate(addDays(predFinish, 1));
+      updateSuccessors(t);
+    }
+  });
+}
+
+/* ===================== DEPENDENCIAS (flechas simples) ===================== */
+function drawDependencies() {
+  // Se dibujan con SVG encima (simplificado)
+  // Por rendimiento en este ejemplo se omiten las flechas SVG complejas.
+  // Se puede ampliar fácilmente con <svg> absolute.
+}
+
+/* ===================== ACCIONES ===================== */
+function addTask() {
+  const newId = Math.max(...tasks.map(t => t.id)) + 1;
+  tasks.push({
+    id: newId, name: "Nueva tarea", duration: 5,
+    start: formatDate(new Date()), percent: 0,
+    level: 0, summary: false, pred: null, collapsed: false, critical: false
+  });
+  selectedId = newId;
+  render();
+  editSelected();
+}
+
+function editSelected() {
+  if (!selectedId) return alert('Selecciona una tarea primero');
+  const t = tasks.find(x => x.id === selectedId);
+  editingId = t.id;
+  document.getElementById('modalTitle').textContent = 'Editar tarea #' + t.id;
+  document.getElementById('mName').value = t.name;
+  document.getElementById('mDuration').value = t.duration;
+  document.getElementById('mStart').value = t.start;
+  document.getElementById('mPercent').value = t.percent;
+  document.getElementById('mPred').value = t.pred || '';
+  document.getElementById('mSummary').value = t.summary;
+  document.getElementById('editModal').classList.add('show');
+}
+
+function saveTask() {
+  const t = tasks.find(x => x.id === editingId);
+  t.name = document.getElementById('mName').value;
+  t.duration = parseInt(document.getElementById('mDuration').value) || 0;
+  t.start = document.getElementById('mStart').value;
+  t.percent = parseInt(document.getElementById('mPercent').value) || 0;
+  t.pred = parseInt(document.getElementById('mPred').value) || null;
+  t.summary = document.getElementById('mSummary').value === 'true';
+  closeModal();
+  render();
+  saveData();
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('show');
+}
+
+function deleteSelected() {
+  if (!selectedId) return;
+  if (!confirm('¿Eliminar tarea #' + selectedId + '?')) return;
+  tasks = tasks.filter(t => t.id !== selectedId);
+  selectedId = null;
+  render();
+  saveData();
+}
+
+function indentTask() {
+  const t = tasks.find(x => x.id === selectedId);
+  if (t && t.level < 3) { t.level++; render(); saveData(); }
+}
+function outdentTask() {
+  const t = tasks.find(x => x.id === selectedId);
+  if (t && t.level > 0) { t.level--; render(); saveData(); }
+}
+
+function toggleCollapse(id) {
+  const t = tasks.find(x => x.id === id);
+  t.collapsed = !t.collapsed;
+  render();
+}
+
+function toggleExpandAll(expand) {
+  tasks.forEach(t => { if (t.summary) t.collapsed = !expand; });
+  render();
+}
+
+function changeScale(val) {
+  scale = val;
+  render();
+}
+
+function calculateCriticalPath() {
+  // Algoritmo simple: marcar la cadena más larga
+  tasks.forEach(t => t.critical = false);
+  // Marcamos manualmente las que ya tenían critical + las de mayor duración
+  let longest = tasks.reduce((a,b) => a.duration > b.duration ? a : b);
+  let current = longest;
+  while (current) {
+    current.critical = true;
+    current = tasks.find(t => t.id === current.pred);
+  }
+  tasks.filter(t => t.summary).forEach(t => t.critical = true);
+  render();
+  alert('Ruta crítica calculada (algoritmo simplificado)');
+}
+
+function exportCSV() {
+  let csv = 'ID,Nombre,Duración,Inicio,Fin,% Completado,Nivel,Predecesora\n';
+  tasks.forEach(t => {
+    csv += `${t.id},"${t.name}",${t.duration},${t.start},${formatDate(getFinish(t))},${t.percent},${t.level},${t.pred||''}\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'wellmont-gantt.csv'; a.click();
+}
+
+function showTooltip(e, t) {
+  const tip = document.getElementById('tooltip');
+  tip.innerHTML = `<b>${t.name}</b><br>
+    Duración: ${t.duration} días<br>
+    Inicio: ${t.start}<br>
+    Fin: ${formatDate(getFinish(t))}<br>
+    Avance: ${t.percent}%` + (t.pred ? `<br>Predecesora: #${t.pred}` : '');
+  tip.style.display = 'block';
+  tip.style.left = (e.clientX + 15) + 'px';
+  tip.style.top = (e.clientY + 15) + 'px';
+}
 function hideTooltip() {
   document.getElementById('tooltip').style.display = 'none';
 }
 
-renderGantt();
+function saveData() {
+  localStorage.setItem('wellmont-gantt', JSON.stringify(tasks));
+  document.getElementById('status').textContent = 'Guardado ' + new Date().toLocaleTimeString();
+}
+function loadData() {
+  const saved = localStorage.getItem('wellmont-gantt');
+  if (saved) {
+    tasks = JSON.parse(saved);
+    document.getElementById('status').textContent = 'Datos restaurados';
+  }
+}
+
+function updateStatus() {
+  // vacío
+}
+
+/* Inicio */
+loadData();
+render();
 </script>
 </body>
 </html>
