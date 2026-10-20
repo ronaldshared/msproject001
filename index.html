@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>WELLMONT-11 – Gantt funcional estilo Microsoft Project</title>
+<title>WELLMONT-11 – Gantt completo estilo Microsoft Project</title>
 <style>
   :root {
     --header-bg: #f3f3f3;
@@ -10,107 +10,130 @@
     --critical: #e74c3c;
     --bar-blue: #5b9bd5;
     --bar-teal: #70ad47;
-    --bar-orange: #ed7d31;
     --summary: #2c3e50;
+    --baseline: #a0a0a0;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
   body { background: #e8e8e8; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-  /* Toolbar */
   .toolbar {
     background: #2b579a; color: white; padding: 8px 12px;
-    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 13px;
   }
   .toolbar button, .toolbar select {
     background: #3b6db0; color: white; border: 1px solid #1e3f6f;
-    padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 13px;
+    padding: 5px 10px; border-radius: 3px; cursor: pointer;
   }
   .toolbar button:hover { background: #4a7bc8; }
-  .toolbar .sep { width: 1px; height: 24px; background: #5a8ad0; margin: 0 4px; }
+  .toolbar .sep { width: 1px; height: 22px; background: #5a8ad0; margin: 0 4px; }
+  .toolbar label { margin-left: 4px; }
 
-  /* Main layout */
   .main { flex: 1; display: flex; overflow: hidden; }
   .left-panel {
-    width: 520px; background: white; border-right: 2px solid var(--border);
+    width: 620px; background: white; border-right: 2px solid var(--border);
     display: flex; flex-direction: column; overflow: hidden;
   }
   .right-panel { flex: 1; overflow: auto; background: white; position: relative; }
 
-  /* Table header */
   .grid-header {
     display: grid;
-    grid-template-columns: 40px 1fr 80px 90px 90px 70px;
+    grid-template-columns: 36px 1.4fr 70px 90px 90px 60px 110px;
     background: var(--header-bg); border-bottom: 1px solid var(--border);
     font-weight: 600; font-size: 12px; position: sticky; top: 0; z-index: 20;
   }
-  .grid-header > div { padding: 8px 6px; border-right: 1px solid var(--border); }
+  .grid-header > div { padding: 7px 5px; border-right: 1px solid var(--border); }
 
-  /* Task rows */
   .task-row {
     display: grid;
-    grid-template-columns: 40px 1fr 80px 90px 90px 70px;
-    border-bottom: 1px solid #e0e0e0; font-size: 13px; height: 32px;
+    grid-template-columns: 36px 1.4fr 70px 90px 90px 60px 110px;
+    border-bottom: 1px solid #e0e0e0; font-size: 12.5px; height: 30px;
     align-items: center; cursor: default;
   }
   .task-row:hover { background: #f0f7ff; }
   .task-row.selected { background: #d6eaf8; }
-  .task-row.summary { font-weight: 600; background: #f8f8f8; }
+  .task-row.summary { font-weight: 600; background: #f7f7f7; }
   .task-row .id { text-align: center; color: #666; }
-  .task-row .name { padding-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .task-row .name .indent { display: inline-block; }
-  .task-row input { width: 100%; border: 1px solid #aaa; padding: 2px 4px; font-size: 12px; }
+  .task-row .name { padding-left: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* Timeline */
   .timeline-header {
     display: flex; background: var(--header-bg); border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 15; height: 48px;
+    position: sticky; top: 0; z-index: 15; height: 46px;
   }
   .month-cell { border-right: 1px solid var(--border); text-align: center; font-size: 12px; font-weight: 600; padding-top: 4px; }
-  .day-cell { border-right: 1px solid #eee; height: 20px; font-size: 10px; text-align: center; color: #555; }
 
   .bars-container { position: relative; }
-  .bar-row { height: 32px; position: relative; border-bottom: 1px solid #f0f0f0; }
+  .bar-row { height: 30px; position: relative; border-bottom: 1px solid #f0f0f0; }
   .bar {
-    position: absolute; height: 18px; top: 7px; border-radius: 3px;
-    color: white; font-size: 11px; line-height: 18px; text-align: center;
-    cursor: move; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    overflow: hidden; white-space: nowrap;
+    position: absolute; height: 16px; top: 7px; border-radius: 3px;
+    color: white; font-size: 11px; line-height: 16px; text-align: center;
+    cursor: move; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    overflow: hidden; white-space: nowrap; z-index: 3;
   }
   .bar.critical { background: var(--critical) !important; }
-  .bar.summary-bar { background: var(--summary); height: 10px; top: 11px; }
-  .bar .progress {
-    position: absolute; left: 0; top: 0; height: 100%; background: rgba(0,0,0,0.25);
-  }
+  .bar.summary-bar { background: var(--summary); height: 9px; top: 10px; }
+  .bar .progress { position: absolute; left: 0; top: 0; height: 100%; background: rgba(0,0,0,.28); }
   .milestone {
-    width: 14px; height: 14px; background: #2c3e50; transform: rotate(45deg);
+    width: 12px; height: 12px; background: #2c3e50; transform: rotate(45deg);
     top: 9px; border-radius: 1px;
+  }
+  .baseline-bar {
+    position: absolute; height: 5px; top: 22px; background: var(--baseline);
+    border-radius: 1px; opacity: 0.7; z-index: 1;
   }
   .today-line {
     position: absolute; top: 0; bottom: 0; width: 2px; background: #e74c3c;
-    z-index: 5; pointer-events: none;
+    z-index: 6; pointer-events: none;
   }
-  .dep-arrow { position: absolute; pointer-events: none; z-index: 4; }
 
-  /* Context menu & modal */
+  /* SVG dependencies */
+  #depSvg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 4;
+  }
+
+  /* Calendar view */
+  .calendar-view { padding: 16px; display: none; }
+  .calendar-view.active { display: block; }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  }
+  .cal-day-name { text-align: center; font-weight: 600; padding: 6px; background: #eee; }
+  .cal-day {
+    min-height: 90px; border: 1px solid #ddd; padding: 4px; font-size: 12px;
+    background: #fafafa; position: relative;
+  }
+  .cal-day.other { background: #f0f0f0; color: #999; }
+  .cal-day .day-num { font-weight: 600; margin-bottom: 2px; }
+  .cal-event {
+    background: #5b9bd5; color: white; padding: 1px 4px; margin: 1px 0;
+    border-radius: 2px; font-size: 10px; white-space: nowrap; overflow: hidden;
+    cursor: pointer;
+  }
+  .cal-event.critical { background: var(--critical); }
+
   .modal {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
     z-index: 100; justify-content: center; align-items: center;
   }
   .modal.show { display: flex; }
   .modal-content {
-    background: white; padding: 20px; border-radius: 6px; width: 420px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    background: white; padding: 20px; border-radius: 6px; width: 460px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.3); max-height: 90vh; overflow-y: auto;
   }
   .modal-content h3 { margin-bottom: 12px; }
   .modal-content label { display: block; margin: 8px 0 2px; font-size: 13px; }
-  .modal-content input, .modal-content select { width: 100%; padding: 6px; margin-bottom: 8px; }
-  .modal-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+  .modal-content input, .modal-content select { width: 100%; padding: 6px; margin-bottom: 6px; }
+  .modal-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
 
   .tooltip {
     position: fixed; background: #1e1e1e; color: white; padding: 8px 12px;
     border-radius: 4px; font-size: 12px; z-index: 200; display: none;
-    max-width: 280px; pointer-events: none;
+    max-width: 300px; pointer-events: none; line-height: 1.4;
   }
+
+  .gantt-view { display: block; }
+  .gantt-view.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -124,26 +147,39 @@
   <button onclick="indentTask()">→ Indentar</button>
   <button onclick="outdentTask()">← Outdent</button>
   <div class="sep"></div>
-  <button onclick="toggleExpandAll(true)">Expandir todo</button>
-  <button onclick="toggleExpandAll(false)">Colapsar todo</button>
+  <button onclick="toggleExpandAll(true)">Expandir</button>
+  <button onclick="toggleExpandAll(false)">Colapsar</button>
   <div class="sep"></div>
-  <label style="font-size:13px">Escala:</label>
+  <label>Escala:</label>
   <select id="scaleSelect" onchange="changeScale(this.value)">
     <option value="day">Día</option>
     <option value="week" selected>Semana</option>
     <option value="month">Mes</option>
   </select>
   <div class="sep"></div>
+  <label>Filtro:</label>
+  <select id="filterSelect" onchange="applyFilter(this.value)">
+    <option value="all">Todas</option>
+    <option value="critical">Solo críticas</option>
+    <option value="incomplete">Incompletas</option>
+    <option value="completed">Completadas</option>
+    <option value="delayed">Retrasadas</option>
+  </select>
+  <div class="sep"></div>
   <button onclick="calculateCriticalPath()">Ruta Crítica</button>
+  <button onclick="setBaseline()">Establecer Baseline</button>
   <button onclick="exportCSV()">Exportar CSV</button>
   <button onclick="window.print()">Imprimir / PDF</button>
   <div class="sep"></div>
+  <button onclick="switchView('gantt')">Vista Gantt</button>
+  <button onclick="switchView('calendar')">Vista Calendario</button>
+  <div class="sep"></div>
   <button onclick="saveData()">💾 Guardar</button>
-  <span id="status" style="margin-left:auto;font-size:12px;opacity:0.8"></span>
+  <span id="status" style="margin-left:auto;font-size:12px;opacity:.85"></span>
 </div>
 
 <div class="main">
-  <!-- Left: Task list -->
+  <!-- Left panel -->
   <div class="left-panel">
     <div class="grid-header">
       <div>ID</div>
@@ -151,19 +187,35 @@
       <div>Duración</div>
       <div>Inicio</div>
       <div>Fin</div>
-      <div>% Completado</div>
+      <div>%</div>
+      <div>Recurso</div>
     </div>
     <div id="taskList" style="overflow-y:auto;flex:1"></div>
   </div>
 
-  <!-- Right: Timeline -->
+  <!-- Right panel -->
   <div class="right-panel" id="rightPanel">
-    <div class="timeline-header" id="timelineHeader"></div>
-    <div class="bars-container" id="barsContainer"></div>
+    <!-- Gantt -->
+    <div class="gantt-view" id="ganttView">
+      <div class="timeline-header" id="timelineHeader"></div>
+      <div class="bars-container" id="barsContainer">
+        <svg id="depSvg"></svg>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar-view" id="calendarView">
+      <div class="cal-header">
+        <button onclick="changeCalMonth(-1)">‹ Anterior</button>
+        <h2 id="calTitle"></h2>
+        <button onclick="changeCalMonth(1)">Siguiente ›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
   </div>
 </div>
 
-<!-- Modal Editar -->
+<!-- Modal -->
 <div class="modal" id="editModal">
   <div class="modal-content">
     <h3 id="modalTitle">Editar tarea</h3>
@@ -171,14 +223,19 @@
     <input type="text" id="mName">
     <label>Duración (días)</label>
     <input type="number" id="mDuration" min="0">
-    <label>Inicio (YYYY-MM-DD)</label>
+    <label>Inicio</label>
     <input type="date" id="mStart">
     <label>% Completado</label>
     <input type="number" id="mPercent" min="0" max="100" value="0">
     <label>Predecesora (ID)</label>
     <input type="number" id="mPred" placeholder="Ej: 4">
+    <label>Recurso</label>
+    <input type="text" id="mResource" placeholder="Nombre de la persona">
     <label>Es tarea resumen</label>
-    <select id="mSummary"><option value="false">No</option><option value="true">Sí</option></select>
+    <select id="mSummary">
+      <option value="false">No</option>
+      <option value="true">Sí</option>
+    </select>
     <div class="modal-buttons">
       <button onclick="closeModal()">Cancelar</button>
       <button onclick="saveTask()" style="background:#2b579a;color:white">Guardar</button>
@@ -189,44 +246,46 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-/* ===================== DATOS INICIALES (extraídos de la imagen) ===================== */
+/* ===================== DATOS ===================== */
 let tasks = [
-  {id:1, name:"Notice to Proceed", duration:0, start:"2019-06-03", percent:100, level:0, summary:false, pred:null, collapsed:false, critical:false},
-  {id:2, name:"Project Start", duration:0, start:"2019-06-04", percent:100, level:0, summary:false, pred:1, collapsed:false, critical:false},
-  {id:3, name:"Project Complete", duration:0, start:"2019-09-10", percent:0, level:0, summary:false, pred:22, collapsed:false, critical:true},
-  {id:4, name:"Mobilization", duration:10, start:"2019-06-05", percent:100, level:0, summary:false, pred:2, collapsed:false, critical:false},
-  {id:5, name:"Construction", duration:51, start:"2019-06-24", percent:60, level:0, summary:true, pred:4, collapsed:false, critical:true},
-  {id:6, name:"Below Grade", duration:13, start:"2019-06-24", percent:100, level:1, summary:true, pred:null, collapsed:false, critical:false},
-  {id:7, name:"Grade Site", duration:8, start:"2019-06-24", percent:100, level:2, summary:false, pred:null, collapsed:false, critical:false},
-  {id:8, name:"Set Foundation", duration:9, start:"2019-06-24", percent:100, level:2, summary:false, pred:7, collapsed:false, critical:false},
-  {id:9, name:"Dig Cable Trench", duration:4, start:"2019-07-08", percent:100, level:2, summary:false, pred:8, collapsed:false, critical:false},
-  {id:10,name:"Above Grade", duration:20, start:"2019-07-11", percent:70, level:1, summary:true, pred:6, collapsed:false, critical:true},
-  {id:11,name:"Erect Steel Structures", duration:8, start:"2019-07-11", percent:100, level:2, summary:false, pred:null, collapsed:false, critical:true},
-  {id:12,name:"Install Equipment", duration:6, start:"2019-07-16", percent:80, level:2, summary:false, pred:11, collapsed:false, critical:false},
-  {id:13,name:"Install Grounding", duration:2, start:"2019-07-25", percent:50, level:2, summary:false, pred:12, collapsed:false, critical:false},
-  {id:14,name:"Install Bus and Jumpers", duration:8, start:"2019-07-25", percent:40, level:2, summary:false, pred:12, collapsed:false, critical:true},
-  {id:15,name:"Lay Control Cable", duration:7, start:"2019-07-28", percent:30, level:2, summary:false, pred:14, collapsed:false, critical:true},
-  {id:16,name:"Fence", duration:14, start:"2019-07-28", percent:20, level:1, summary:true, pred:null, collapsed:false, critical:false},
-  {id:17,name:"Install Fence", duration:7, start:"2019-07-28", percent:20, level:2, summary:false, pred:null, collapsed:false, critical:false},
-  {id:18,name:"Site Restoration", duration:8, start:"2019-08-15", percent:0, level:1, summary:true, pred:10, collapsed:false, critical:true},
-  {id:19,name:"Remove Equipment", duration:5, start:"2019-08-15", percent:0, level:2, summary:false, pred:null, collapsed:false, critical:true},
-  {id:20,name:"Lay Storing", duration:2, start:"2019-07-16", percent:100, level:2, summary:false, pred:null, collapsed:false, critical:false},
-  {id:21,name:"Lay Roadway", duration:4, start:"2019-07-18", percent:100, level:2, summary:false, pred:20, collapsed:false, critical:false},
-  {id:22,name:"Project Closeout", duration:10, start:"2019-08-26", percent:0, level:0, summary:true, pred:18, collapsed:false, critical:true},
-  {id:23,name:"Substantial Completion", duration:10, start:"2019-08-26", percent:0, level:1, summary:false, pred:null, collapsed:false, critical:true}
+  {id:1, name:"Notice to Proceed", duration:0, start:"2019-06-03", percent:100, level:0, summary:false, pred:null, resource:"Project Manager", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:2, name:"Project Start", duration:0, start:"2019-06-04", percent:100, level:0, summary:false, pred:1, resource:"Project Manager", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:3, name:"Project Complete", duration:0, start:"2019-09-10", percent:0, level:0, summary:false, pred:22, resource:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
+  {id:4, name:"Mobilization", duration:10, start:"2019-06-05", percent:100, level:0, summary:false, pred:2, resource:"Site Team", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:5, name:"Construction", duration:51, start:"2019-06-24", percent:60, level:0, summary:true, pred:4, resource:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
+  {id:6, name:"Below Grade", duration:13, start:"2019-06-24", percent:100, level:1, summary:true, pred:null, resource:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:7, name:"Grade Site", duration:8, start:"2019-06-24", percent:100, level:2, summary:false, pred:null, resource:"Civil Crew", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:8, name:"Set Foundation", duration:9, start:"2019-06-24", percent:100, level:2, summary:false, pred:7, resource:"Civil Crew", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:9, name:"Dig Cable Trench", duration:4, start:"2019-07-08", percent:100, level:2, summary:false, pred:8, resource:"Electrical", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:10,name:"Above Grade", duration:20, start:"2019-07-11", percent:70, level:1, summary:true, pred:6, resource:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
+  {id:11,name:"Erect Steel Structures", duration:8, start:"2019-07-11", percent:100, level:2, summary:false, pred:null, resource:"Steel Crew", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
+  {id:12,name:"Install Equipment", duration:6, start:"2019-07-16", percent:80, level:2, summary:false, pred:11, resource:"Mech. Team", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:13,name:"Install Grounding", duration:2, start:"2019-07-25", percent:50, level:2, summary:false, pred:12, resource:"Electrical", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:14,name:"Install Bus and Jumpers", duration:8, start:"2019-07-25", percent:40, level:2, summary:false, pred:12, resource:"Electrical", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
+  {id:15,name:"Lay Control Cable", duration:7, start:"2019-07-28", percent:30, level:2, summary:false, pred:14, resource:"Electrical", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
+  {id:16,name:"Fence", duration:14, start:"2019-07-28", percent:20, level:1, summary:true, pred:null, resource:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:17,name:"Install Fence", duration:7, start:"2019-07-28", percent:20, level:2, summary:false, pred:null, resource:"Fence Crew", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:18,name:"Site Restoration", duration:8, start:"2019-08-15", percent:0, level:1, summary:true, pred:10, resource:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
+  {id:19,name:"Remove Equipment", duration:5, start:"2019-08-15", percent:0, level:2, summary:false, pred:null, resource:"Mech. Team", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
+  {id:20,name:"Lay Storing", duration:2, start:"2019-07-16", percent:100, level:2, summary:false, pred:null, resource:"Civil Crew", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:21,name:"Lay Roadway", duration:4, start:"2019-07-18", percent:100, level:2, summary:false, pred:20, resource:"Civil Crew", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
+  {id:22,name:"Project Closeout", duration:10, start:"2019-08-26", percent:0, level:0, summary:true, pred:18, resource:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
+  {id:23,name:"Substantial Completion", duration:10, start:"2019-08-26", percent:0, level:1, summary:false, pred:null, resource:"Project Manager", collapsed:false, critical:true, baselineStart:null, baselineDuration:null}
 ];
 
 let selectedId = null;
-let scale = 'week';          // day | week | month
-let dayWidth = 18;           // se ajusta según escala
-let projectStart = new Date('2019-06-01');
+let scale = 'week';
+let dayWidth = 12;
+let currentFilter = 'all';
+let currentView = 'gantt';
+let calYear = 2019;
+let calMonth = 6; // junio = 6
 let editingId = null;
+let projectStart = new Date('2019-06-01');
 
-/* ===================== UTILIDADES DE FECHA ===================== */
+/* ===================== UTILIDADES ===================== */
 function parseDate(str) { return new Date(str + 'T00:00:00'); }
-function formatDate(d) {
-  return d.toISOString().slice(0,10);
-}
+function formatDate(d) { return d.toISOString().slice(0,10); }
 function addDays(date, days) {
   const r = new Date(date);
   r.setDate(r.getDate() + days);
@@ -239,11 +298,33 @@ function getFinish(task) {
   return addDays(parseDate(task.start), task.duration);
 }
 
+/* ===================== FILTRO ===================== */
+function passesFilter(t) {
+  if (currentFilter === 'all') return true;
+  if (currentFilter === 'critical') return t.critical;
+  if (currentFilter === 'incomplete') return t.percent < 100;
+  if (currentFilter === 'completed') return t.percent === 100;
+  if (currentFilter === 'delayed') {
+    if (!t.baselineStart) return false;
+    return parseDate(t.start) > parseDate(t.baselineStart);
+  }
+  return true;
+}
+
+function applyFilter(val) {
+  currentFilter = val;
+  render();
+}
+
 /* ===================== RENDER ===================== */
 function render() {
-  renderTaskList();
-  renderTimeline();
-  drawDependencies();
+  if (currentView === 'gantt') {
+    renderTaskList();
+    renderTimeline();
+    drawDependencies();
+  } else {
+    renderCalendar();
+  }
   updateStatus();
 }
 
@@ -251,13 +332,13 @@ function renderTaskList() {
   const container = document.getElementById('taskList');
   container.innerHTML = '';
   tasks.forEach(t => {
-    if (isHidden(t)) return;
+    if (isHidden(t) || !passesFilter(t)) return;
     const row = document.createElement('div');
     row.className = 'task-row' + (t.summary ? ' summary' : '') + (t.id === selectedId ? ' selected' : '');
     row.onclick = () => { selectedId = t.id; render(); };
 
-    const indent = '&nbsp;'.repeat(t.level * 4);
-    const toggle = t.summary ? `<span onclick="event.stopPropagation();toggleCollapse(${t.id})" style="cursor:pointer;margin-right:4px">${t.collapsed ? '▶' : '▼'}</span>` : '';
+    const indent = '&nbsp;'.repeat(t.level * 3);
+    const toggle = t.summary ? `<span onclick="event.stopPropagation();toggleCollapse(${t.id})" style="cursor:pointer;margin-right:3px">${t.collapsed ? '▶' : '▼'}</span>` : '';
 
     row.innerHTML = `
       <div class="id">${t.id}</div>
@@ -266,13 +347,13 @@ function renderTaskList() {
       <div>${t.start}</div>
       <div>${formatDate(getFinish(t))}</div>
       <div>${t.percent}%</div>
+      <div title="${t.resource||''}">${t.resource || '—'}</div>
     `;
     container.appendChild(row);
   });
 }
 
 function isHidden(task) {
-  // Si algún ancestro está colapsado
   let level = task.level;
   for (let i = tasks.indexOf(task) - 1; i >= 0; i--) {
     if (tasks[i].level < level) {
@@ -284,63 +365,72 @@ function isHidden(task) {
 }
 
 function renderTimeline() {
-  // Ajustar dayWidth según escala
-  if (scale === 'day') dayWidth = 28;
-  else if (scale === 'week') dayWidth = 12;
-  else dayWidth = 4;
+  if (scale === 'day') dayWidth = 26;
+  else if (scale === 'week') dayWidth = 11;
+  else dayWidth = 3.8;
 
   const header = document.getElementById('timelineHeader');
   const bars = document.getElementById('barsContainer');
-  header.innerHTML = '';
-  bars.innerHTML = '';
+  const svg = document.getElementById('depSvg');
 
-  // Rango total
+  // limpiar
+  header.innerHTML = '';
+  // mantener el svg
+  while (bars.children.length > 1) bars.removeChild(bars.lastChild);
+
   let minD = parseDate('2019-06-01');
-  let maxD = parseDate('2019-09-20');
+  let maxD = parseDate('2019-09-25');
   const totalDays = daysBetween(minD, maxD) + 1;
   const totalWidth = totalDays * dayWidth;
 
-  // Header meses / semanas
+  // Header
   let html = '';
   let current = new Date(minD);
   while (current <= maxD) {
-    const monthName = current.toLocaleString('es', {month:'short', year:'numeric'});
-    let daysInPeriod = 1;
-    if (scale === 'month') {
-      daysInPeriod = new Date(current.getFullYear(), current.getMonth()+1, 0).getDate() - current.getDate() + 1;
-    } else if (scale === 'week') {
-      daysInPeriod = 7;
-    }
+    const label = current.toLocaleString('es', {month:'short', year:'2-digit'});
+    let daysInPeriod = scale === 'month' ? 30 : (scale === 'week' ? 7 : 1);
     const w = daysInPeriod * dayWidth;
-    html += `<div class="month-cell" style="width:${w}px">${monthName}</div>`;
+    html += `<div class="month-cell" style="width:${w}px">${label}</div>`;
     current = addDays(current, daysInPeriod);
   }
   header.innerHTML = html;
   header.style.width = totalWidth + 'px';
 
   // Barras
+  const visibleTasks = [];
   tasks.forEach(t => {
-    if (isHidden(t)) return;
+    if (isHidden(t) || !passesFilter(t)) return;
+    visibleTasks.push(t);
+
     const row = document.createElement('div');
     row.className = 'bar-row';
     row.style.width = totalWidth + 'px';
+    row.dataset.id = t.id;
 
     const startOffset = daysBetween(minD, parseDate(t.start)) * dayWidth;
-    const width = Math.max(t.duration * dayWidth, t.duration === 0 ? 14 : 8);
+    const width = Math.max(t.duration * dayWidth, t.duration === 0 ? 12 : 6);
+
+    // Baseline
+    if (t.baselineStart) {
+      const bOffset = daysBetween(minD, parseDate(t.baselineStart)) * dayWidth;
+      const bWidth = Math.max((t.baselineDuration || t.duration) * dayWidth, 4);
+      const base = document.createElement('div');
+      base.className = 'baseline-bar';
+      base.style.left = bOffset + 'px';
+      base.style.width = bWidth + 'px';
+      row.appendChild(base);
+    }
 
     const bar = document.createElement('div');
     bar.className = 'bar' + (t.duration === 0 ? ' milestone' : '') + (t.summary ? ' summary-bar' : '') + (t.critical ? ' critical' : '');
     bar.style.left = startOffset + 'px';
-    bar.style.width = (t.duration === 0 ? 14 : width) + 'px';
+    bar.style.width = (t.duration === 0 ? 12 : width) + 'px';
     bar.style.background = t.critical ? 'var(--critical)' : (t.summary ? 'var(--summary)' : 'var(--bar-blue)');
     if (t.duration > 0) {
-      bar.innerHTML = `<div class="progress" style="width:${t.percent}%"></div>${t.duration > 3 ? t.name : ''}`;
+      bar.innerHTML = `<div class="progress" style="width:${t.percent}%"></div>${t.duration > 4 ? t.name.substring(0,18) : ''}`;
     }
 
-    // Drag
     bar.onmousedown = (e) => startDrag(e, t, bar, minD);
-
-    // Tooltip
     bar.onmouseenter = (e) => showTooltip(e, t);
     bar.onmouseleave = hideTooltip;
 
@@ -348,7 +438,7 @@ function renderTimeline() {
     bars.appendChild(row);
   });
 
-  // Línea de hoy (ejemplo 15 julio 2019)
+  // Today line
   const today = parseDate('2019-07-15');
   const todayX = daysBetween(minD, today) * dayWidth;
   const line = document.createElement('div');
@@ -357,10 +447,62 @@ function renderTimeline() {
   bars.appendChild(line);
 
   bars.style.width = totalWidth + 'px';
-  bars.style.height = (tasks.filter(t => !isHidden(t)).length * 32) + 'px';
+  bars.style.height = (visibleTasks.length * 30) + 'px';
+  svg.style.width = totalWidth + 'px';
+  svg.style.height = (visibleTasks.length * 30) + 'px';
 }
 
-/* ===================== DRAG & RESIZE ===================== */
+/* ===================== FLECHAS DE DEPENDENCIA ===================== */
+function drawDependencies() {
+  const svg = document.getElementById('depSvg');
+  svg.innerHTML = '';
+  const rows = [...document.querySelectorAll('.bar-row')];
+  const idToIndex = {};
+  rows.forEach((r, i) => idToIndex[r.dataset.id] = i);
+
+  tasks.forEach(t => {
+    if (!t.pred || isHidden(t) || !passesFilter(t)) return;
+    const pred = tasks.find(x => x.id === t.pred);
+    if (!pred || isHidden(pred) || !passesFilter(pred)) return;
+
+    const fromIdx = idToIndex[pred.id];
+    const toIdx = idToIndex[t.id];
+    if (fromIdx === undefined || toIdx === undefined) return;
+
+    const fromRow = rows[fromIdx];
+    const toRow = rows[toIdx];
+    const fromBar = fromRow.querySelector('.bar');
+    const toBar = toRow.querySelector('.bar');
+    if (!fromBar || !toBar) return;
+
+    const x1 = parseFloat(fromBar.style.left) + parseFloat(fromBar.style.width);
+    const y1 = fromIdx * 30 + 15;
+    const x2 = parseFloat(toBar.style.left);
+    const y2 = toIdx * 30 + 15;
+
+    // Línea con codo
+    const midX = x1 + 12;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M${x1},${y1} H${midX} V${y2} H${x2}`);
+    path.setAttribute('stroke', t.critical ? '#c0392b' : '#555');
+    path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('marker-end', 'url(#arrowhead)');
+    svg.appendChild(path);
+  });
+
+  // Marker arrowhead
+  if (!document.getElementById('arrowhead')) {
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    defs.innerHTML = `
+      <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#555"/>
+      </marker>`;
+    svg.appendChild(defs);
+  }
+}
+
+/* ===================== DRAG ===================== */
 let dragState = null;
 function startDrag(e, task, barEl, minD) {
   e.preventDefault();
@@ -370,35 +512,30 @@ function startDrag(e, task, barEl, minD) {
   const isResize = e.offsetX > origWidth - 8;
 
   dragState = { task, barEl, startX, origLeft, origWidth, isResize, minD };
-
   document.onmousemove = onDrag;
   document.onmouseup = endDrag;
 }
-
 function onDrag(e) {
   if (!dragState) return;
   const dx = e.clientX - dragState.startX;
   if (dragState.isResize) {
-    const newW = Math.max(dayWidth, dragState.origWidth + dx);
-    dragState.barEl.style.width = newW + 'px';
+    dragState.barEl.style.width = Math.max(dayWidth, dragState.origWidth + dx) + 'px';
   } else {
     dragState.barEl.style.left = (dragState.origLeft + dx) + 'px';
   }
 }
-
 function endDrag() {
   if (!dragState) return;
-  const { task, barEl, origLeft, origWidth, isResize, minD } = dragState;
+  const { task, barEl, origLeft, isResize } = dragState;
   const newLeft = parseFloat(barEl.style.left);
   const newWidth = parseFloat(barEl.style.width);
 
   if (isResize) {
-    task.duration = Math.round(newWidth / dayWidth);
+    task.duration = Math.max(0, Math.round(newWidth / dayWidth));
   } else {
     const daysMoved = Math.round((newLeft - origLeft) / dayWidth);
     task.start = formatDate(addDays(parseDate(task.start), daysMoved));
   }
-  // Recalcular finish de predecesoras simples (FS)
   updateSuccessors(task);
   dragState = null;
   document.onmousemove = null;
@@ -406,22 +543,78 @@ function endDrag() {
   render();
   saveData();
 }
-
 function updateSuccessors(changed) {
   tasks.forEach(t => {
     if (t.pred === changed.id) {
-      const predFinish = getFinish(changed);
-      t.start = formatDate(addDays(predFinish, 1));
+      t.start = formatDate(addDays(getFinish(changed), 1));
       updateSuccessors(t);
     }
   });
 }
 
-/* ===================== DEPENDENCIAS (flechas simples) ===================== */
-function drawDependencies() {
-  // Se dibujan con SVG encima (simplificado)
-  // Por rendimiento en este ejemplo se omiten las flechas SVG complejas.
-  // Se puede ampliar fácilmente con <svg> absolute.
+/* ===================== CALENDARIO ===================== */
+function switchView(view) {
+  currentView = view;
+  document.getElementById('ganttView').classList.toggle('hidden', view !== 'gantt');
+  document.getElementById('calendarView').classList.toggle('active', view === 'calendar');
+  render();
+}
+
+function changeCalMonth(delta) {
+  calMonth += delta;
+  if (calMonth > 12) { calMonth = 1; calYear++; }
+  if (calMonth < 1) { calMonth = 12; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const title = document.getElementById('calTitle');
+  const grid = document.getElementById('calGrid');
+  const monthNames = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  title.textContent = `${monthNames[calMonth]} ${calYear}`;
+
+  grid.innerHTML = '';
+  ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-name';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  const firstDay = new Date(calYear, calMonth - 1, 1);
+  let startWeekDay = firstDay.getDay(); // 0=Dom
+  if (startWeekDay === 0) startWeekDay = 7;
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+
+  // días del mes anterior
+  for (let i = 1; i < startWeekDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day other';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    el.innerHTML = `<div class="day-num">${d}</div>`;
+
+    const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    tasks.forEach(t => {
+      if (!passesFilter(t)) return;
+      const start = parseDate(t.start);
+      const finish = getFinish(t);
+      const cur = parseDate(dateStr);
+      if (cur >= start && cur <= finish) {
+        const ev = document.createElement('div');
+        ev.className = 'cal-event' + (t.critical ? ' critical' : '');
+        ev.textContent = t.name;
+        ev.title = t.name + ' (' + t.resource + ')';
+        ev.onclick = () => { selectedId = t.id; editSelected(); };
+        el.appendChild(ev);
+      }
+    });
+    grid.appendChild(el);
+  }
 }
 
 /* ===================== ACCIONES ===================== */
@@ -430,7 +623,9 @@ function addTask() {
   tasks.push({
     id: newId, name: "Nueva tarea", duration: 5,
     start: formatDate(new Date()), percent: 0,
-    level: 0, summary: false, pred: null, collapsed: false, critical: false
+    level: 0, summary: false, pred: null, resource: "",
+    collapsed: false, critical: false,
+    baselineStart: null, baselineDuration: null
   });
   selectedId = newId;
   render();
@@ -438,7 +633,7 @@ function addTask() {
 }
 
 function editSelected() {
-  if (!selectedId) return alert('Selecciona una tarea primero');
+  if (!selectedId) return alert('Selecciona una tarea');
   const t = tasks.find(x => x.id === selectedId);
   editingId = t.id;
   document.getElementById('modalTitle').textContent = 'Editar tarea #' + t.id;
@@ -447,6 +642,7 @@ function editSelected() {
   document.getElementById('mStart').value = t.start;
   document.getElementById('mPercent').value = t.percent;
   document.getElementById('mPred').value = t.pred || '';
+  document.getElementById('mResource').value = t.resource || '';
   document.getElementById('mSummary').value = t.summary;
   document.getElementById('editModal').classList.add('show');
 }
@@ -458,19 +654,16 @@ function saveTask() {
   t.start = document.getElementById('mStart').value;
   t.percent = parseInt(document.getElementById('mPercent').value) || 0;
   t.pred = parseInt(document.getElementById('mPred').value) || null;
+  t.resource = document.getElementById('mResource').value;
   t.summary = document.getElementById('mSummary').value === 'true';
   closeModal();
   render();
   saveData();
 }
-
-function closeModal() {
-  document.getElementById('editModal').classList.remove('show');
-}
+function closeModal() { document.getElementById('editModal').classList.remove('show'); }
 
 function deleteSelected() {
-  if (!selectedId) return;
-  if (!confirm('¿Eliminar tarea #' + selectedId + '?')) return;
+  if (!selectedId || !confirm('¿Eliminar tarea #' + selectedId + '?')) return;
   tasks = tasks.filter(t => t.id !== selectedId);
   selectedId = null;
   render();
@@ -479,7 +672,7 @@ function deleteSelected() {
 
 function indentTask() {
   const t = tasks.find(x => x.id === selectedId);
-  if (t && t.level < 3) { t.level++; render(); saveData(); }
+  if (t && t.level < 4) { t.level++; render(); saveData(); }
 }
 function outdentTask() {
   const t = tasks.find(x => x.id === selectedId);
@@ -491,73 +684,78 @@ function toggleCollapse(id) {
   t.collapsed = !t.collapsed;
   render();
 }
-
 function toggleExpandAll(expand) {
   tasks.forEach(t => { if (t.summary) t.collapsed = !expand; });
   render();
 }
 
-function changeScale(val) {
-  scale = val;
-  render();
-}
+function changeScale(val) { scale = val; render(); }
 
 function calculateCriticalPath() {
-  // Algoritmo simple: marcar la cadena más larga
   tasks.forEach(t => t.critical = false);
-  // Marcamos manualmente las que ya tenían critical + las de mayor duración
-  let longest = tasks.reduce((a,b) => a.duration > b.duration ? a : b);
-  let current = longest;
-  while (current) {
-    current.critical = true;
-    current = tasks.find(t => t.id === current.pred);
-  }
-  tasks.filter(t => t.summary).forEach(t => t.critical = true);
+  // Cadena más larga simple + las ya marcadas
+  const leaves = tasks.filter(t => !tasks.some(x => x.pred === t.id));
+  leaves.forEach(leaf => {
+    let cur = leaf;
+    while (cur) {
+      cur.critical = true;
+      cur = tasks.find(x => x.id === cur.pred);
+    }
+  });
   render();
-  alert('Ruta crítica calculada (algoritmo simplificado)');
+  alert('Ruta crítica actualizada');
+}
+
+function setBaseline() {
+  if (!confirm('¿Establecer la línea base con las fechas actuales?')) return;
+  tasks.forEach(t => {
+    t.baselineStart = t.start;
+    t.baselineDuration = t.duration;
+  });
+  render();
+  saveData();
+  alert('Baseline guardada');
 }
 
 function exportCSV() {
-  let csv = 'ID,Nombre,Duración,Inicio,Fin,% Completado,Nivel,Predecesora\n';
+  let csv = 'ID,Nombre,Duración,Inicio,Fin,% ,Recurso,Nivel,Predecesora,Crítica,BaselineStart\n';
   tasks.forEach(t => {
-    csv += `${t.id},"${t.name}",${t.duration},${t.start},${formatDate(getFinish(t))},${t.percent},${t.level},${t.pred||''}\n`;
+    csv += `${t.id},"${t.name}",${t.duration},${t.start},${formatDate(getFinish(t))},${t.percent},"${t.resource||''}",${t.level},${t.pred||''},${t.critical},${t.baselineStart||''}\n`;
   });
   const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'wellmont-gantt.csv'; a.click();
+  a.href = URL.createObjectURL(blob);
+  a.download = 'wellmont-gantt-completo.csv';
+  a.click();
 }
 
 function showTooltip(e, t) {
   const tip = document.getElementById('tooltip');
   tip.innerHTML = `<b>${t.name}</b><br>
     Duración: ${t.duration} días<br>
-    Inicio: ${t.start}<br>
-    Fin: ${formatDate(getFinish(t))}<br>
-    Avance: ${t.percent}%` + (t.pred ? `<br>Predecesora: #${t.pred}` : '');
+    Inicio: ${t.start} → Fin: ${formatDate(getFinish(t))}<br>
+    Avance: ${t.percent}%<br>
+    Recurso: ${t.resource || '—'}<br>
+    ${t.pred ? 'Predecesora: #' + t.pred + '<br>' : ''}
+    ${t.baselineStart ? 'Baseline: ' + t.baselineStart : ''}`;
   tip.style.display = 'block';
-  tip.style.left = (e.clientX + 15) + 'px';
-  tip.style.top = (e.clientY + 15) + 'px';
+  tip.style.left = (e.clientX + 14) + 'px';
+  tip.style.top = (e.clientY + 14) + 'px';
 }
-function hideTooltip() {
-  document.getElementById('tooltip').style.display = 'none';
-}
+function hideTooltip() { document.getElementById('tooltip').style.display = 'none'; }
 
 function saveData() {
-  localStorage.setItem('wellmont-gantt', JSON.stringify(tasks));
+  localStorage.setItem('wellmont-gantt-full', JSON.stringify(tasks));
   document.getElementById('status').textContent = 'Guardado ' + new Date().toLocaleTimeString();
 }
 function loadData() {
-  const saved = localStorage.getItem('wellmont-gantt');
+  const saved = localStorage.getItem('wellmont-gantt-full');
   if (saved) {
     tasks = JSON.parse(saved);
     document.getElementById('status').textContent = 'Datos restaurados';
   }
 }
-
-function updateStatus() {
-  // vacío
-}
+function updateStatus() {}
 
 /* Inicio */
 loadData();
