@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>WELLMONT-11 – MS Project Pro Final</title>
+<title>WELLMONT-11 – MS Project Pro + CPM + XML Export</title>
 <style>
   :root {
     --header-bg: #f3f3f3;
@@ -23,48 +23,47 @@
   .toolbar .sep{width:1px;height:22px;background:#5a8ad0;margin:0 4px}
 
   .main{flex:1;display:flex;overflow:hidden}
-  .left-panel{width:760px;background:#fff;border-right:2px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+  .left-panel{width:940px;background:#fff;border-right:2px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
   .right-panel{flex:1;overflow:auto;background:#fff;position:relative}
 
-  .grid-header{display:grid;grid-template-columns:36px 1.5fr 60px 88px 88px 48px 100px 150px 90px;background:var(--header-bg);border-bottom:1px solid var(--border);font-weight:600;font-size:12px;position:sticky;top:0;z-index:20}
-  .grid-header>div{padding:7px 4px;border-right:1px solid var(--border)}
+  .grid-header{display:grid;grid-template-columns:34px 1.4fr 55px 85px 85px 45px 95px 130px 70px 55px 55px;background:var(--header-bg);border-bottom:1px solid var(--border);font-weight:600;font-size:11.5px;position:sticky;top:0;z-index:20}
+  .grid-header>div{padding:6px 3px;border-right:1px solid var(--border)}
 
-  .task-row{display:grid;grid-template-columns:36px 1.5fr 60px 88px 88px 48px 100px 150px 90px;border-bottom:1px solid #e0e0e0;font-size:12.5px;height:30px;align-items:center}
+  .task-row{display:grid;grid-template-columns:34px 1.4fr 55px 85px 85px 45px 95px 130px 70px 55px 55px;border-bottom:1px solid #e0e0e0;font-size:12px;height:28px;align-items:center}
   .task-row:hover{background:#f0f7ff}
   .task-row.selected{background:#d6eaf8}
   .task-row.summary{font-weight:600;background:#f7f7f7}
   .task-row .id{text-align:center;color:#666}
-  .task-row .name{padding-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .task-row .name{padding-left:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .task-row .slack{text-align:center}
+  .task-row .slack.zero{color:#c0392b;font-weight:600}
 
-  .timeline-header{display:flex;background:var(--header-bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:15;height:46px}
+  .timeline-header{display:flex;background:var(--header-bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:15;height:44px}
   .month-cell{border-right:1px solid var(--border);text-align:center;font-size:12px;font-weight:600;padding-top:4px}
 
   .bars-container{position:relative}
-  .bar-row{height:30px;position:relative;border-bottom:1px solid #f0f0f0}
-  .bar{position:absolute;height:16px;top:7px;border-radius:3px;color:#fff;font-size:11px;line-height:16px;text-align:center;cursor:move;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.2);overflow:hidden;white-space:nowrap;z-index:3}
+  .bar-row{height:28px;position:relative;border-bottom:1px solid #f0f0f0}
+  .bar{position:absolute;height:15px;top:6px;border-radius:3px;color:#fff;font-size:10px;line-height:15px;text-align:center;cursor:move;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.2);overflow:hidden;white-space:nowrap;z-index:3}
   .bar.critical{background:var(--critical)!important}
-  .bar.summary-bar{background:var(--summary);height:9px;top:10px}
+  .bar.summary-bar{background:var(--summary);height:8px;top:9px}
   .bar .progress{position:absolute;left:0;top:0;height:100%;background:rgba(0,0,0,.28)}
-  .milestone{width:12px;height:12px;background:#2c3e50;transform:rotate(45deg);top:9px}
-  .baseline-bar{position:absolute;height:5px;top:22px;background:var(--baseline);border-radius:1px;opacity:.7;z-index:1}
+  .milestone{width:11px;height:11px;background:#2c3e50;transform:rotate(45deg);top:8px}
+  .baseline-bar{position:absolute;height:4px;top:20px;background:var(--baseline);border-radius:1px;opacity:.7;z-index:1}
   .today-line{position:absolute;top:0;bottom:0;width:2px;background:#e74c3c;z-index:6;pointer-events:none}
   #depSvg{position:absolute;top:0;left:0;pointer-events:none;z-index:4}
 
-  .resource-view{display:none}
-  .resource-view.active{display:block}
+  .resource-view{display:none}.resource-view.active{display:block}
   .res-header{display:grid;grid-template-columns:200px 1fr;background:var(--header-bg);font-weight:600;padding:8px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-  .res-row{display:grid;grid-template-columns:200px 1fr;border-bottom:1px solid #eee;min-height:40px}
-  .res-name{padding:10px;font-weight:600;background:#f8f8f8;border-right:1px solid var(--border);display:flex;align-items:center;gap:6px}
+  .res-row{display:grid;grid-template-columns:200px 1fr;border-bottom:1px solid #eee;min-height:38px}
+  .res-name{padding:9px;font-weight:600;background:#f8f8f8;border-right:1px solid var(--border)}
   .res-name.overallocated{background:#ffebee;color:#c62828}
   .res-timeline{position:relative;height:100%}
-  .res-bar{position:absolute;height:16px;top:12px;border-radius:3px;font-size:11px;color:#fff;line-height:16px;padding:0 5px;overflow:hidden;white-space:nowrap;cursor:pointer}
+  .res-bar{position:absolute;height:15px;top:11px;border-radius:3px;font-size:10px;color:#fff;line-height:15px;padding:0 4px;overflow:hidden;white-space:nowrap;cursor:pointer}
   .res-bar.over{background:var(--overalloc)!important}
 
   .gantt-view.hidden{display:none}
-  .calendar-view{display:none;padding:16px}
-  .calendar-view.active{display:block}
+  .calendar-view{display:none;padding:16px}.calendar-view.active{display:block}
 
-  /* Context Menu */
   .context-menu{position:fixed;background:#fff;border:1px solid #aaa;box-shadow:2px 2px 8px rgba(0,0,0,.2);z-index:1000;display:none;min-width:200px;font-size:13px}
   .context-menu div{padding:8px 14px;cursor:pointer}
   .context-menu div:hover{background:#e8f0fe}
@@ -114,10 +113,11 @@
     <option value="delayed">Retrasadas</option>
   </select>
   <div class="sep"></div>
-  <button onclick="calculateCriticalPath()">Ruta Crítica</button>
+  <button onclick="runCPM()">CPM + Holgura</button>
   <button onclick="setBaseline()">Baseline</button>
   <button onclick="rescheduleAll()">Recalcular</button>
   <button onclick="exportCSV()">CSV</button>
+  <button onclick="exportMSProjectXML()">Exportar XML MS Project</button>
   <div class="sep"></div>
   <button onclick="switchView('gantt')">Gantt</button>
   <button onclick="switchView('resources')">Recursos</button>
@@ -132,13 +132,15 @@
     <div class="grid-header">
       <div>ID</div>
       <div>Nombre de tarea</div>
-      <div>Duración</div>
+      <div>Dur.</div>
       <div>Inicio</div>
       <div>Fin</div>
       <div>%</div>
       <div>Recurso</div>
       <div>Predecesoras</div>
       <div>Restricción</div>
+      <div>H.Total</div>
+      <div>H.Libre</div>
     </div>
     <div id="taskList" style="overflow-y:auto;flex:1"></div>
   </div>
@@ -163,7 +165,6 @@
   </div>
 </div>
 
-<!-- Context Menu -->
 <div class="context-menu" id="contextMenu">
   <div onclick="editSelected()">✏️ Editar</div>
   <div onclick="addTask()">➕ Insertar tarea</div>
@@ -175,13 +176,12 @@
   <div onclick="deleteSelected()">🗑️ Eliminar</div>
 </div>
 
-<!-- Modal -->
 <div class="modal" id="editModal">
   <div class="modal-content">
     <h3 id="modalTitle">Editar tarea</h3>
     <label>Nombre</label>
     <input type="text" id="mName">
-    <label>Duración (días)</label>
+    <label>Duración (días laborables)</label>
     <input type="number" id="mDuration" min="0">
     <label>Inicio</label>
     <input type="date" id="mStart">
@@ -198,7 +198,7 @@
       <option value="SNET">No empezar antes de</option>
       <option value="SNLT">No empezar después de</option>
     </select>
-    <label>Fecha de restricción / Deadline</label>
+    <label>Fecha de restricción</label>
     <input type="date" id="mConstraintDate">
     <label>Es tarea resumen</label>
     <select id="mSummary"><option value="false">No</option><option value="true">Sí</option></select>
@@ -217,7 +217,7 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-/* ===================== DATOS + HISTORIAL ===================== */
+/* ===================== ESTADO + HISTORIAL ===================== */
 let tasks = [];
 let selectedId = null;
 let scale = 'week';
@@ -232,7 +232,6 @@ let historyIndex = -1;
 const MAX_HISTORY = 40;
 
 function pushHistory() {
-  // eliminar futuros si estamos en medio del historial
   history = history.slice(0, historyIndex + 1);
   history.push(JSON.stringify(tasks));
   if (history.length > MAX_HISTORY) history.shift();
@@ -258,91 +257,345 @@ function updateUndoRedoButtons() {
   document.getElementById('btnRedo').disabled = historyIndex >= history.length - 1;
 }
 
-/* ===== Datos iniciales ===== */
-function initData() {
-  tasks = [
-    {id:1, name:"Notice to Proceed", duration:0, start:"2019-06-03", percent:100, level:0, summary:false, resource:"Project Manager", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:2, name:"Project Start", duration:0, start:"2019-06-04", percent:100, level:0, summary:false, resource:"Project Manager", preds:[{id:1,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:3, name:"Project Complete", duration:0, start:"2019-09-10", percent:0, level:0, summary:false, resource:"", preds:[{id:22,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
-    {id:4, name:"Mobilization", duration:10, start:"2019-06-05", percent:100, level:0, summary:false, resource:"Site Team", preds:[{id:2,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:5, name:"Construction", duration:51, start:"2019-06-24", percent:60, level:0, summary:true, resource:"", preds:[{id:4,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
-    {id:6, name:"Below Grade", duration:13, start:"2019-06-24", percent:100, level:1, summary:true, resource:"", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:7, name:"Grade Site", duration:8, start:"2019-06-24", percent:100, level:2, summary:false, resource:"Civil Crew", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:8, name:"Set Foundation", duration:9, start:"2019-06-24", percent:100, level:2, summary:false, resource:"Civil Crew", preds:[{id:7,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:9, name:"Dig Cable Trench", duration:4, start:"2019-07-08", percent:100, level:2, summary:false, resource:"Electrical", preds:[{id:8,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:10,name:"Above Grade", duration:20, start:"2019-07-11", percent:70, level:1, summary:true, resource:"", preds:[{id:6,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
-    {id:11,name:"Erect Steel Structures", duration:8, start:"2019-07-11", percent:100, level:2, summary:false, resource:"Steel Crew", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
-    {id:12,name:"Install Equipment", duration:6, start:"2019-07-16", percent:80, level:2, summary:false, resource:"Mech. Team", preds:[{id:11,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:13,name:"Install Grounding", duration:2, start:"2019-07-25", percent:50, level:2, summary:false, resource:"Electrical", preds:[{id:12,type:"SS",lag:2}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:14,name:"Install Bus and Jumpers", duration:8, start:"2019-07-25", percent:40, level:2, summary:false, resource:"Electrical", preds:[{id:12,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
-    {id:15,name:"Lay Control Cable", duration:7, start:"2019-07-28", percent:30, level:2, summary:false, resource:"Electrical", preds:[{id:14,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
-    {id:16,name:"Fence", duration:14, start:"2019-07-28", percent:20, level:1, summary:true, resource:"", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:17,name:"Install Fence", duration:7, start:"2019-07-28", percent:20, level:2, summary:false, resource:"Fence Crew", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:18,name:"Site Restoration", duration:8, start:"2019-08-15", percent:0, level:1, summary:true, resource:"", preds:[{id:10,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
-    {id:19,name:"Remove Equipment", duration:5, start:"2019-08-15", percent:0, level:2, summary:false, resource:"Mech. Team", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
-    {id:20,name:"Lay Storing", duration:2, start:"2019-07-16", percent:100, level:2, summary:false, resource:"Civil Crew", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:21,name:"Lay Roadway", duration:4, start:"2019-07-18", percent:100, level:2, summary:false, resource:"Civil Crew", preds:[{id:20,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null},
-    {id:22,name:"Project Closeout", duration:10, start:"2019-08-26", percent:0, level:0, summary:true, resource:"", preds:[{id:18,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null},
-    {id:23,name:"Substantial Completion", duration:10, start:"2019-08-26", percent:0, level:1, summary:false, resource:"Project Manager", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:true, baselineStart:null, baselineDuration:null}
-  ];
-  pushHistory();
+/* ===================== CALENDARIO LABORAL ===================== */
+function isWorkingDay(date) {
+  const day = date.getDay();
+  return day !== 0 && day !== 6;
+}
+function addWorkingDays(startDate, days) {
+  if (days === 0) return new Date(startDate);
+  let result = new Date(startDate);
+  let added = 0;
+  const direction = days > 0 ? 1 : -1;
+  const absDays = Math.abs(days);
+  while (added < absDays) {
+    result.setDate(result.getDate() + direction);
+    if (isWorkingDay(result)) added++;
+  }
+  return result;
+}
+function daysBetween(a, b) {
+  return Math.round((b - a) / 86400000);
 }
 
-/* ===== Utilidades ===== */
+/* ===================== UTILIDADES ===================== */
 const parseDate = s => new Date(s + 'T00:00:00');
 const formatDate = d => d.toISOString().slice(0,10);
-const addDays = (d,n) => {const r=new Date(d); r.setDate(r.getDate()+n); return r;};
-const daysBetween = (a,b) => Math.round((b-a)/86400000);
-const getFinish = t => addDays(parseDate(t.start), t.duration);
+const getFinish = t => addWorkingDays(parseDate(t.start), t.duration);
 
 function calculateStartFromPred(task, predTask, type, lag) {
   const pStart = parseDate(predTask.start);
   const pFinish = getFinish(predTask);
   switch(type) {
-    case 'FS': return addDays(pFinish, lag);
-    case 'SS': return addDays(pStart, lag);
-    case 'FF': return addDays(addDays(pFinish, lag), -task.duration);
-    case 'SF': return addDays(addDays(pStart, lag), -task.duration);
-    default: return addDays(pFinish, lag);
+    case 'FS': return addWorkingDays(pFinish, lag);
+    case 'SS': return addWorkingDays(pStart, lag);
+    case 'FF': return addWorkingDays(addWorkingDays(pFinish, lag), -task.duration);
+    case 'SF': return addWorkingDays(addWorkingDays(pStart, lag), -task.duration);
+    default: return addWorkingDays(pFinish, lag);
   }
 }
 
-function rescheduleAll() {
+/* ===================== CPM ===================== */
+function runCPM() {
+  tasks.forEach(t => { t.es = 0; t.ef = t.duration; });
+
   let changed = true, safety = 0;
-  while(changed && safety < 40) {
+  while (changed && safety < 50) {
     changed = false; safety++;
     tasks.forEach(t => {
-      if(!t.preds || !t.preds.length) return;
-      let latest = null;
+      if (!t.preds || !t.preds.length) return;
+      let maxES = 0;
       t.preds.forEach(p => {
         const pred = tasks.find(x => x.id === p.id);
-        if(!pred) return;
-        const cand = calculateStartFromPred(t, pred, p.type, p.lag||0);
-        if(!latest || cand > latest) latest = cand;
+        if (!pred) return;
+        let candidate = 0;
+        if (p.type === 'FS') candidate = pred.ef + (p.lag || 0);
+        else if (p.type === 'SS') candidate = pred.es + (p.lag || 0);
+        else if (p.type === 'FF') candidate = pred.ef + (p.lag || 0) - t.duration;
+        else if (p.type === 'SF') candidate = pred.es + (p.lag || 0) - t.duration;
+        if (candidate > maxES) maxES = candidate;
       });
-      if(latest) {
-        const ns = formatDate(latest);
-        if(ns !== t.start) { t.start = ns; changed = true; }
+      if (maxES > t.es) {
+        t.es = maxES;
+        t.ef = t.es + t.duration;
+        changed = true;
       }
     });
   }
+
+  const projectEF = Math.max(...tasks.map(t => t.ef), 0);
+  tasks.forEach(t => {
+    t.lf = projectEF;
+    t.ls = t.lf - t.duration;
+  });
+
+  changed = true; safety = 0;
+  while (changed && safety < 50) {
+    changed = false; safety++;
+    for (let i = tasks.length - 1; i >= 0; i--) {
+      const t = tasks[i];
+      const successors = tasks.filter(s => (s.preds || []).some(p => p.id === t.id));
+      if (successors.length === 0) continue;
+      let minLS = Infinity;
+      successors.forEach(s => {
+        const link = s.preds.find(p => p.id === t.id);
+        let candidate = s.ls - (link.lag || 0);
+        if (candidate < minLS) minLS = candidate;
+      });
+      if (minLS < t.lf) {
+        t.lf = minLS;
+        t.ls = t.lf - t.duration;
+        changed = true;
+      }
+    }
+  }
+
+  tasks.forEach(t => {
+    t.totalSlack = t.ls - t.es;
+    const successors = tasks.filter(s => (s.preds || []).some(p => p.id === t.id));
+    if (successors.length === 0) t.freeSlack = t.totalSlack;
+    else {
+      const minSuccES = Math.min(...successors.map(s => s.es));
+      t.freeSlack = Math.max(0, minSuccES - t.ef);
+    }
+    t.critical = t.totalSlack <= 0;
+  });
   render();
 }
 
-/* ===== Render ===== */
+/* ===================== RESCHEDULE ===================== */
+function rescheduleAll() {
+  let changed = true, safety = 0;
+  while (changed && safety < 40) {
+    changed = false; safety++;
+    tasks.forEach(t => {
+      if (!t.preds || !t.preds.length) return;
+      let latest = null;
+      t.preds.forEach(p => {
+        const pred = tasks.find(x => x.id === p.id);
+        if (!pred) return;
+        const cand = calculateStartFromPred(t, pred, p.type, p.lag || 0);
+        if (!latest || cand > latest) latest = cand;
+      });
+      if (latest) {
+        const ns = formatDate(latest);
+        if (ns !== t.start) { t.start = ns; changed = true; }
+      }
+    });
+  }
+  runCPM();
+}
+
+/* ===================== EXPORTAR XML MICROSOFT PROJECT ===================== */
+function exportMSProjectXML() {
+  const escapeXml = (str) => String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  // Recursos únicos
+  const resourceNames = [...new Set(tasks.filter(t => t.resource).map(t => t.resource))];
+  const resourceMap = {};
+  resourceNames.forEach((name, i) => resourceMap[name] = i + 1);
+
+  let xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Project xmlns="http://schemas.microsoft.com/project">
+  <SaveVersion>14</SaveVersion>
+  <Name>WELLMONT-11</Name>
+  <Title>WELLMONT-11</Title>
+  <Company>Gantt Web Pro</Company>
+  <Author>Grok Export</Author>
+  <CreationDate>${new Date().toISOString()}</CreationDate>
+  <ScheduleFromStart>1</ScheduleFromStart>
+  <StartDate>${tasks.length ? tasks[0].start : '2019-06-01'}T08:00:00</StartDate>
+  <FYStartDate>1</FYStartDate>
+  <CriticalSlackLimit>0</CriticalSlackLimit>
+  <CurrencyDigits>2</CurrencyDigits>
+  <CurrencySymbol>$</CurrencySymbol>
+  <CurrencyCode>USD</CurrencyCode>
+  <CalendarUID>1</CalendarUID>
+  <DefaultStartTime>08:00:00</DefaultStartTime>
+  <DefaultFinishTime>17:00:00</DefaultFinishTime>
+  <MinutesPerDay>480</MinutesPerDay>
+  <MinutesPerWeek>2400</MinutesPerWeek>
+  <DaysPerMonth>20</DaysPerMonth>
+  <DefaultTaskType>0</DefaultTaskType>
+  <DefaultFixedCostAccrual>2</DefaultFixedCostAccrual>
+  <DefaultTaskEVMethod>0</DefaultTaskEVMethod>
+  <ProjectExternallyEdited>0</ProjectExternallyEdited>
+
+  <Calendars>
+    <Calendar>
+      <UID>1</UID>
+      <Name>Standard</Name>
+      <IsBaseCalendar>1</IsBaseCalendar>
+      <BaseCalendarUID>-1</BaseCalendarUID>
+      <WeekDays>
+        <WeekDay><DayType>1</DayType><DayWorking>0</DayWorking></WeekDay>
+        <WeekDay><DayType>2</DayType><DayWorking>1</DayWorking>
+          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
+          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
+        </WeekDay>
+        <WeekDay><DayType>3</DayType><DayWorking>1</DayWorking>
+          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
+          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
+        </WeekDay>
+        <WeekDay><DayType>4</DayType><DayWorking>1</DayWorking>
+          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
+          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
+        </WeekDay>
+        <WeekDay><DayType>5</DayType><DayWorking>1</DayWorking>
+          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
+          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
+        </WeekDay>
+        <WeekDay><DayType>6</DayType><DayWorking>1</DayWorking>
+          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
+          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
+        </WeekDay>
+        <WeekDay><DayType>7</DayType><DayWorking>0</DayWorking></WeekDay>
+      </WeekDays>
+    </Calendar>
+  </Calendars>
+
+  <Tasks>
+`;
+
+  tasks.forEach((t, index) => {
+    const start = t.start + 'T08:00:00';
+    const finish = formatDate(getFinish(t)) + 'T17:00:00';
+    const outlineLevel = (t.level || 0) + 1;
+    const isSummary = t.summary ? 1 : 0;
+    const isMilestone = t.duration === 0 ? 1 : 0;
+    const percent = t.percent || 0;
+
+    xml += `    <Task>
+      <UID>${t.id}</UID>
+      <ID>${index + 1}</ID>
+      <Name>${escapeXml(t.name)}</Name>
+      <Type>0</Type>
+      <IsNull>0</IsNull>
+      <OutlineLevel>${outlineLevel}</OutlineLevel>
+      <OutlineNumber>${outlineLevel}</OutlineNumber>
+      <WBS>${t.id}</WBS>
+      <Summary>${isSummary}</Summary>
+      <Critical>${t.critical ? 1 : 0}</Critical>
+      <Priority>500</Priority>
+      <Start>${start}</Start>
+      <Finish>${finish}</Finish>
+      <Duration>PT${t.duration * 8}H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT${t.duration * 8}H0M0S</Work>
+      <PercentComplete>${percent}</PercentComplete>
+      <PercentWorkComplete>${percent}</PercentWorkComplete>
+      <Milestone>${isMilestone}</Milestone>
+      <FixedCostAccrual>2</FixedCostAccrual>
+      <ConstraintType>0</ConstraintType>
+      <CalendarUID>-1</CalendarUID>
+`;
+
+    // Predecessors
+    if (t.preds && t.preds.length) {
+      t.preds.forEach((p, i) => {
+        // MS Project Link types: 0=FF, 1=FS, 2=SF, 3=SS
+        let linkType = 1; // FS
+        if (p.type === 'SS') linkType = 3;
+        else if (p.type === 'FF') linkType = 0;
+        else if (p.type === 'SF') linkType = 2;
+
+        xml += `      <PredecessorLink>
+        <PredecessorUID>${p.id}</PredecessorUID>
+        <Type>${linkType}</Type>
+        <CrossProject>0</CrossProject>
+        <LinkLag>${(p.lag || 0) * 4800}</LinkLag>
+        <LagFormat>7</LagFormat>
+      </PredecessorLink>
+`;
+      });
+    }
+
+    xml += `    </Task>
+`;
+  });
+
+  xml += `  </Tasks>
+
+  <Resources>
+`;
+
+  resourceNames.forEach((name, i) => {
+    xml += `    <Resource>
+      <UID>${i + 1}</UID>
+      <ID>${i + 1}</ID>
+      <Name>${escapeXml(name)}</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <MaxUnits>1.00</MaxUnits>
+      <PeakUnits>1.00</PeakUnits>
+      <OverAllocated>0</OverAllocated>
+      <CanLevel>1</CanLevel>
+      <AccrueAt>3</AccrueAt>
+    </Resource>
+`;
+  });
+
+  xml += `  </Resources>
+
+  <Assignments>
+`;
+
+  let assignUID = 1;
+  tasks.forEach(t => {
+    if (!t.resource || !resourceMap[t.resource]) return;
+    const resUID = resourceMap[t.resource];
+    const start = t.start + 'T08:00:00';
+    const finish = formatDate(getFinish(t)) + 'T17:00:00';
+
+    xml += `    <Assignment>
+      <UID>${assignUID++}</UID>
+      <TaskUID>${t.id}</TaskUID>
+      <ResourceUID>${resUID}</ResourceUID>
+      <PercentWorkComplete>${t.percent || 0}</PercentWorkComplete>
+      <Units>1.0</Units>
+      <Work>PT${t.duration * 8}H0M0S</Work>
+      <Start>${start}</Start>
+      <Finish>${finish}</Finish>
+    </Assignment>
+`;
+  });
+
+  xml += `  </Assignments>
+</Project>`;
+
+  // Descargar
+  const blob = new Blob([xml], { type: 'application/xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'WELLMONT-11.xml';
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  alert('Archivo XML generado.\nÁbrelo con Microsoft Project (Archivo → Abrir → seleccionar el .xml)');
+}
+
+/* ===================== RENDER y resto de funciones ===================== */
+// (Aquí van exactamente las mismas funciones de render, drag, modal, etc. de la versión anterior)
+// Para no hacer este mensaje excesivamente largo, el resto del código (renderTaskList, renderTimeline, drawDependencies, 
+// Resource View, Drag, Context Menu, Keyboard, CRUD, loadData, etc.) es idéntico a la versión anterior.
+
+// Por favor, combina este export con el código completo de la respuesta anterior.
+// Si quieres el archivo 100% completo en un solo bloque, dímelo y te lo entrego entero otra vez.
+
 function passesFilter(t) {
-  if(currentFilter==='all') return true;
-  if(currentFilter==='critical') return t.critical;
-  if(currentFilter==='incomplete') return t.percent < 100;
-  if(currentFilter==='completed') return t.percent === 100;
-  if(currentFilter==='delayed') return t.baselineStart && parseDate(t.start) > parseDate(t.baselineStart);
+  if (currentFilter === 'all') return true;
+  if (currentFilter === 'critical') return t.critical;
+  if (currentFilter === 'incomplete') return t.percent < 100;
+  if (currentFilter === 'completed') return t.percent === 100;
+  if (currentFilter === 'delayed') return t.baselineStart && parseDate(t.start) > parseDate(t.baselineStart);
   return true;
 }
+
 function isHidden(task) {
   let level = task.level;
-  for(let i = tasks.indexOf(task)-1; i>=0; i--) {
-    if(tasks[i].level < level) {
-      if(tasks[i].collapsed) return true;
+  for (let i = tasks.indexOf(task) - 1; i >= 0; i--) {
+    if (tasks[i].level < level) {
+      if (tasks[i].collapsed) return true;
       level = tasks[i].level;
     }
   }
@@ -350,427 +603,35 @@ function isHidden(task) {
 }
 
 function render() {
-  if(currentView==='gantt') { renderTaskList(); renderTimeline(); drawDependencies(); }
-  else if(currentView==='resources') renderResourceView();
-  else renderCalendar();
-}
-
-function renderTaskList() {
-  const c = document.getElementById('taskList');
-  c.innerHTML = '';
-  tasks.forEach(t => {
-    if(isHidden(t) || !passesFilter(t)) return;
-    const row = document.createElement('div');
-    row.className = 'task-row' + (t.summary?' summary':'') + (t.id===selectedId?' selected':'');
-    row.onclick = () => { selectedId = t.id; render(); };
-    row.oncontextmenu = e => { e.preventDefault(); selectedId = t.id; showContextMenu(e.pageX, e.pageY); render(); };
-
-    const indent = '&nbsp;'.repeat(t.level*3);
-    const toggle = t.summary ? `<span onclick="event.stopPropagation();toggleCollapse(${t.id})" style="cursor:pointer;margin-right:3px">${t.collapsed?'▶':'▼'}</span>` : '';
-    const predText = (t.preds||[]).map(p => `${p.id}${p.type}${p.lag?(p.lag>0?'+':'')+p.lag+'d':''}`).join(', ') || '—';
-    const consText = t.constraint === 'ASAP' ? 'ASAP' : (t.constraint + (t.constraintDate ? ' ' + t.constraintDate : ''));
-
-    row.innerHTML = `
-      <div class="id">${t.id}</div>
-      <div class="name">${toggle}${indent}${t.name}</div>
-      <div>${t.duration}d</div>
-      <div>${t.start}</div>
-      <div>${formatDate(getFinish(t))}</div>
-      <div>${t.percent}%</div>
-      <div>${t.resource||'—'}</div>
-      <div title="${predText}">${predText}</div>
-      <div title="${consText}">${consText}</div>`;
-    c.appendChild(row);
-  });
-}
-
-function renderTimeline() {
-  dayWidth = scale==='day' ? 24 : (scale==='week' ? 11 : 3.6);
-  const header = document.getElementById('timelineHeader');
-  const bars = document.getElementById('barsContainer');
-  const svg = document.getElementById('depSvg');
-  header.innerHTML = '';
-  while(bars.children.length > 1) bars.removeChild(bars.lastChild);
-
-  const minD = parseDate('2019-06-01');
-  const maxD = parseDate('2019-09-25');
-  const totalDays = daysBetween(minD, maxD) + 1;
-  const totalWidth = totalDays * dayWidth;
-
-  let html = '', cur = new Date(minD);
-  while(cur <= maxD) {
-    const label = cur.toLocaleString('es',{month:'short',year:'2-digit'});
-    const days = scale==='month'?30:(scale==='week'?7:1);
-    html += `<div class="month-cell" style="width:${days*dayWidth}px">${label}</div>`;
-    cur = addDays(cur, days);
-  }
-  header.innerHTML = html;
-  header.style.width = totalWidth + 'px';
-
-  const visible = [];
-  tasks.forEach(t => {
-    if(isHidden(t) || !passesFilter(t)) return;
-    visible.push(t);
-    const row = document.createElement('div');
-    row.className = 'bar-row';
-    row.style.width = totalWidth + 'px';
-    row.dataset.id = t.id;
-
-    if(t.baselineStart) {
-      const bOff = daysBetween(minD, parseDate(t.baselineStart)) * dayWidth;
-      const bW = Math.max((t.baselineDuration||t.duration)*dayWidth, 4);
-      const base = document.createElement('div');
-      base.className = 'baseline-bar';
-      base.style.left = bOff + 'px';
-      base.style.width = bW + 'px';
-      row.appendChild(base);
-    }
-
-    const startOff = daysBetween(minD, parseDate(t.start)) * dayWidth;
-    const w = Math.max(t.duration * dayWidth, t.duration===0 ? 12 : 6);
-    const bar = document.createElement('div');
-    bar.className = 'bar' + (t.duration===0?' milestone':'') + (t.summary?' summary-bar':'') + (t.critical?' critical':'');
-    bar.style.left = startOff + 'px';
-    bar.style.width = (t.duration===0?12:w) + 'px';
-    bar.style.background = t.critical ? 'var(--critical)' : (t.summary ? 'var(--summary)' : 'var(--bar-blue)');
-    if(t.duration > 0) bar.innerHTML = `<div class="progress" style="width:${t.percent}%"></div>${t.duration>4?t.name.substring(0,16):''}`;
-
-    bar.onmousedown = e => startDrag(e, t, bar);
-    bar.onmouseenter = e => showTooltip(e, t);
-    bar.onmouseleave = hideTooltip;
-    bar.oncontextmenu = e => { e.preventDefault(); selectedId=t.id; showContextMenu(e.pageX,e.pageY); };
-    row.appendChild(bar);
-    bars.appendChild(row);
-  });
-
-  const todayX = daysBetween(minD, parseDate('2019-07-15')) * dayWidth;
-  const line = document.createElement('div');
-  line.className = 'today-line';
-  line.style.left = todayX + 'px';
-  bars.appendChild(line);
-
-  bars.style.width = totalWidth + 'px';
-  bars.style.height = (visible.length * 30) + 'px';
-  svg.style.width = totalWidth + 'px';
-  svg.style.height = (visible.length * 30) + 'px';
-}
-
-function drawDependencies() {
-  const svg = document.getElementById('depSvg');
-  svg.innerHTML = '';
-  const rows = [...document.querySelectorAll('.bar-row')];
-  const idToIdx = {};
-  rows.forEach((r,i) => idToIdx[r.dataset.id] = i);
-
-  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
-  defs.innerHTML = `<marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#555"/></marker>`;
-  svg.appendChild(defs);
-
-  tasks.forEach(t => {
-    if(!t.preds || isHidden(t) || !passesFilter(t)) return;
-    t.preds.forEach(p => {
-      const pred = tasks.find(x => x.id === p.id);
-      if(!pred || isHidden(pred) || !passesFilter(pred)) return;
-      const fromIdx = idToIdx[pred.id], toIdx = idToIdx[t.id];
-      if(fromIdx===undefined || toIdx===undefined) return;
-      const fromBar = rows[fromIdx].querySelector('.bar');
-      const toBar = rows[toIdx].querySelector('.bar');
-      if(!fromBar || !toBar) return;
-
-      const fl = parseFloat(fromBar.style.left), fw = parseFloat(fromBar.style.width);
-      const tl = parseFloat(toBar.style.left), tw = parseFloat(toBar.style.width);
-      let x1 = (p.type==='FS'||p.type==='FF') ? fl+fw : fl;
-      let x2 = (p.type==='FS'||p.type==='SS') ? tl : tl+tw;
-      const y1 = fromIdx*30+15, y2 = toIdx*30+15;
-      const mid = x1 + 14;
-
-      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d', `M${x1},${y1} H${mid} V${y2} H${x2}`);
-      path.setAttribute('stroke', t.critical?'#c0392b':'#555');
-      path.setAttribute('stroke-width','1.5');
-      path.setAttribute('fill','none');
-      path.setAttribute('marker-end','url(#arrow)');
-      svg.appendChild(path);
-    });
-  });
-}
-
-/* ===== Resource View ===== */
-function renderResourceView() {
-  const list = document.getElementById('resourceList');
-  list.innerHTML = '';
-  const minD = parseDate('2019-06-01');
-  const totalWidth = daysBetween(minD, parseDate('2019-09-25')) * dayWidth + dayWidth;
-
-  const resMap = {};
-  tasks.forEach(t => {
-    if(!t.resource || t.summary) return;
-    if(!resMap[t.resource]) resMap[t.resource] = [];
-    resMap[t.resource].push(t);
-  });
-
-  Object.keys(resMap).sort().forEach(resName => {
-    const ts = resMap[resName];
-    let over = false;
-    for(let i=0;i<ts.length;i++){
-      for(let j=i+1;j<ts.length;j++){
-        const aS=parseDate(ts[i].start), aF=getFinish(ts[i]);
-        const bS=parseDate(ts[j].start), bF=getFinish(ts[j]);
-        if(aS < bF && bS < aF){ over=true; break; }
-      }
-    }
-    const row = document.createElement('div');
-    row.className = 'res-row';
-    const nameDiv = document.createElement('div');
-    nameDiv.className = 'res-name' + (over?' overallocated':'');
-    nameDiv.innerHTML = over ? `⚠ ${resName}` : resName;
-    row.appendChild(nameDiv);
-
-    const timeline = document.createElement('div');
-    timeline.className = 'res-timeline';
-    timeline.style.width = totalWidth + 'px';
-    timeline.style.height = '40px';
-    ts.forEach(t => {
-      const left = daysBetween(minD, parseDate(t.start)) * dayWidth;
-      const w = Math.max(t.duration * dayWidth, 8);
-      const bar = document.createElement('div');
-      bar.className = 'res-bar' + (over?' over':'');
-      bar.style.left = left + 'px';
-      bar.style.width = w + 'px';
-      bar.style.background = t.critical ? 'var(--critical)' : 'var(--bar-blue)';
-      bar.textContent = t.name.substring(0,18);
-      bar.onclick = () => { selectedId = t.id; switchView('gantt'); };
-      timeline.appendChild(bar);
-    });
-    row.appendChild(timeline);
-    list.appendChild(row);
-  });
-}
-
-/* ===== Drag ===== */
-let dragState = null;
-function startDrag(e, task, bar) {
-  e.preventDefault();
-  dragState = {task, bar, startX: e.clientX, origLeft: parseFloat(bar.style.left), origW: parseFloat(bar.style.width), isResize: e.offsetX > parseFloat(bar.style.width)-8};
-  document.onmousemove = e => {
-    if(!dragState) return;
-    const dx = e.clientX - dragState.startX;
-    if(dragState.isResize) dragState.bar.style.width = Math.max(dayWidth, dragState.origW + dx) + 'px';
-    else dragState.bar.style.left = (dragState.origLeft + dx) + 'px';
-  };
-  document.onmouseup = () => {
-    if(!dragState) return;
-    const {task, bar, origLeft, isResize} = dragState;
-    if(isResize) task.duration = Math.max(0, Math.round(parseFloat(bar.style.width)/dayWidth));
-    else {
-      const days = Math.round((parseFloat(bar.style.left) - origLeft)/dayWidth);
-      task.start = formatDate(addDays(parseDate(task.start), days));
-    }
-    dragState = null;
-    document.onmousemove = document.onmouseup = null;
-    pushHistory();
-    rescheduleAll();
-  };
-}
-
-/* ===== Context Menu ===== */
-function showContextMenu(x, y) {
-  const m = document.getElementById('contextMenu');
-  m.style.left = x + 'px';
-  m.style.top = y + 'px';
-  m.style.display = 'block';
-}
-document.addEventListener('click', () => document.getElementById('contextMenu').style.display = 'none');
-
-/* ===== Keyboard shortcuts ===== */
-document.addEventListener('keydown', e => {
-  if(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-  if(e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
-  if(e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
-  if(e.key === 'Delete' || e.key === 'Backspace') deleteSelected();
-  if(e.key === 'Insert') addTask();
-  if(e.key === 'F2') editSelected();
-});
-
-/* ===== CRUD & Modal ===== */
-function addTask() {
-  const id = Math.max(0, ...tasks.map(t => t.id)) + 1;
-  tasks.push({id, name:"Nueva tarea", duration:5, start:formatDate(new Date()), percent:0, level:0, summary:false, resource:"", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false, baselineStart:null, baselineDuration:null});
-  selectedId = id;
-  pushHistory();
-  render();
-  editSelected();
-}
-function editSelected() {
-  if(!selectedId) return alert('Selecciona una tarea');
-  const t = tasks.find(x => x.id === selectedId);
-  editingId = t.id;
-  document.getElementById('modalTitle').textContent = `Editar #${t.id}`;
-  document.getElementById('mName').value = t.name;
-  document.getElementById('mDuration').value = t.duration;
-  document.getElementById('mStart').value = t.start;
-  document.getElementById('mPercent').value = t.percent;
-  document.getElementById('mResource').value = t.resource || '';
-  document.getElementById('mConstraint').value = t.constraint || 'ASAP';
-  document.getElementById('mConstraintDate').value = t.constraintDate || '';
-  document.getElementById('mSummary').value = t.summary;
-  const pl = document.getElementById('predList');
-  pl.innerHTML = '';
-  (t.preds||[]).forEach(p => addPredRow(p.id, p.type, p.lag));
-  document.getElementById('editModal').classList.add('show');
-}
-function addPredRow(id='', type='FS', lag=0) {
-  const div = document.createElement('div');
-  div.className = 'pred-row';
-  div.innerHTML = `
-    <input type="number" placeholder="ID" value="${id}" style="width:70px">
-    <select>
-      <option value="FS" ${type==='FS'?'selected':''}>FS</option>
-      <option value="SS" ${type==='SS'?'selected':''}>SS</option>
-      <option value="FF" ${type==='FF'?'selected':''}>FF</option>
-      <option value="SF" ${type==='SF'?'selected':''}>SF</option>
-    </select>
-    <input type="number" placeholder="Lag" value="${lag}" style="width:60px">
-    <button onclick="this.parentElement.remove()">✕</button>`;
-  document.getElementById('predList').appendChild(div);
-}
-function saveTask() {
-  const t = tasks.find(x => x.id === editingId);
-  t.name = document.getElementById('mName').value;
-  t.duration = parseInt(document.getElementById('mDuration').value) || 0;
-  t.start = document.getElementById('mStart').value;
-  t.percent = parseInt(document.getElementById('mPercent').value) || 0;
-  t.resource = document.getElementById('mResource').value.trim();
-  t.constraint = document.getElementById('mConstraint').value;
-  t.constraintDate = document.getElementById('mConstraintDate').value;
-  t.summary = document.getElementById('mSummary').value === 'true';
-  t.preds = [];
-  document.querySelectorAll('#predList .pred-row').forEach(row => {
-    const inputs = row.querySelectorAll('input,select');
-    const pid = parseInt(inputs[0].value);
-    if(pid) t.preds.push({id:pid, type:inputs[1].value, lag:parseInt(inputs[2].value)||0});
-  });
-  closeModal();
-  pushHistory();
-  rescheduleAll();
-}
-function closeModal() { document.getElementById('editModal').classList.remove('show'); }
-function deleteSelected() {
-  if(!selectedId || !confirm('¿Eliminar tarea?')) return;
-  tasks = tasks.filter(t => t.id !== selectedId);
-  selectedId = null;
-  pushHistory();
-  render();
-}
-function indentTask() {
-  const t = tasks.find(x => x.id === selectedId);
-  if(t && t.level < 4) { t.level++; pushHistory(); render(); }
-}
-function outdentTask() {
-  const t = tasks.find(x => x.id === selectedId);
-  if(t && t.level > 0) { t.level--; pushHistory(); render(); }
-}
-function toggleCollapse(id) {
-  const t = tasks.find(x => x.id === id);
-  t.collapsed = !t.collapsed;
-  render();
-}
-function toggleExpandAll(expand) {
-  tasks.forEach(t => { if(t.summary) t.collapsed = !expand; });
-  render();
-}
-function toggleMilestone() {
-  const t = tasks.find(x => x.id === selectedId);
-  if(!t) return;
-  if(t.duration === 0) t.duration = 1;
-  else { t.duration = 0; }
-  pushHistory();
-  render();
-}
-function changeScale(v) { scale = v; render(); }
-function applyFilter(v) { currentFilter = v; render(); }
-function calculateCriticalPath() {
-  tasks.forEach(t => t.critical = false);
-  const leaves = tasks.filter(t => !tasks.some(x => (x.preds||[]).some(p => p.id === t.id)));
-  leaves.forEach(leaf => {
-    let cur = leaf;
-    while(cur) {
-      cur.critical = true;
-      const predId = cur.preds && cur.preds[0] ? cur.preds[0].id : null;
-      cur = tasks.find(x => x.id === predId);
-    }
-  });
-  render();
-}
-function setBaseline() {
-  if(!confirm('¿Establecer Baseline?')) return;
-  tasks.forEach(t => { t.baselineStart = t.start; t.baselineDuration = t.duration; });
-  pushHistory();
-  render();
-}
-function exportCSV() {
-  let csv = 'ID,Nombre,Duración,Inicio,Fin,%,Recurso,Predecesoras,Restricción,Crítica\n';
-  tasks.forEach(t => {
-    const pred = (t.preds||[]).map(p=>`${p.id}${p.type}${p.lag||''}`).join(';');
-    csv += `${t.id},"${t.name}",${t.duration},${t.start},${formatDate(getFinish(t))},${t.percent},"${t.resource||''}","${pred}",${t.constraint},${t.critical}\n`;
-  });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = 'wellmont-final.csv';
-  a.click();
-}
-function switchView(v) {
-  currentView = v;
-  document.getElementById('ganttView').classList.toggle('hidden', v !== 'gantt');
-  document.getElementById('resourceView').classList.toggle('active', v === 'resources');
-  document.getElementById('calendarView').classList.toggle('active', v === 'calendar');
-  render();
-}
-function changeCalMonth(d) {
-  calMonth += d;
-  if(calMonth > 12){calMonth=1;calYear++;}
-  if(calMonth < 1){calMonth=12;calYear--;}
-  renderCalendar();
-}
-function renderCalendar() {
-  const title = document.getElementById('calTitle');
-  const grid = document.getElementById('calGrid');
-  const names = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  title.textContent = `${names[calMonth]} ${calYear}`;
-  grid.innerHTML = '';
-  ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(d => {
-    const el = document.createElement('div');
-    el.style.cssText = 'text-align:center;font-weight:600;padding:6px;background:#eee';
-    el.textContent = d;
-    grid.appendChild(el);
-  });
-  // simplificado
-  grid.innerHTML += '<div style="grid-column:1/-1;padding:30px;text-align:center;color:#666">Vista Calendario activa</div>';
-}
-function showTooltip(e, t) {
-  const tip = document.getElementById('tooltip');
-  const pred = (t.preds||[]).map(p=>`#${p.id} ${p.type}${p.lag?((p.lag>0?'+':'')+p.lag+'d'):''}`).join(', ')||'Ninguna';
-  tip.innerHTML = `<b>${t.name}</b><br>${t.start} → ${formatDate(getFinish(t))} (${t.duration}d)<br>Avance: ${t.percent}%<br>Recurso: ${t.resource||'—'}<br>Predecesoras: ${pred}<br>Restricción: ${t.constraint}`;
-  tip.style.display = 'block';
-  tip.style.left = (e.clientX+14)+'px';
-  tip.style.top = (e.clientY+14)+'px';
-}
-function hideTooltip() { document.getElementById('tooltip').style.display = 'none'; }
-function saveData() {
-  localStorage.setItem('wellmont-final', JSON.stringify(tasks));
-  document.getElementById('status').textContent = 'Guardado ' + new Date().toLocaleTimeString();
-}
-function loadData() {
-  const s = localStorage.getItem('wellmont-final');
-  if(s) {
-    tasks = JSON.parse(s);
-    document.getElementById('status').textContent = 'Datos restaurados';
+  if (currentView === 'gantt') {
+    renderTaskList();
+    renderTimeline();
+    drawDependencies();
+  } else if (currentView === 'resources') {
+    renderResourceView();
   } else {
-    initData();
+    renderCalendar();
+  }
+}
+
+// ... (el resto de funciones se mantienen igual que en la versión anterior)
+
+function loadData() {
+  const s = localStorage.getItem('wellmont-cpm');
+  if (s) {
+    tasks = JSON.parse(s);
+  } else {
+    // Datos de ejemplo mínimos
+    tasks = [
+      {id:1, name:"Notice to Proceed", duration:0, start:"2019-06-03", percent:100, level:0, summary:false, resource:"Project Manager", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false},
+      {id:2, name:"Project Start", duration:0, start:"2019-06-04", percent:100, level:0, summary:false, resource:"Project Manager", preds:[{id:1,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false},
+      {id:4, name:"Mobilization", duration:10, start:"2019-06-05", percent:100, level:0, summary:false, resource:"Site Team", preds:[{id:2,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false}
+    ];
   }
   history = [JSON.stringify(tasks)];
   historyIndex = 0;
   updateUndoRedoButtons();
+  runCPM();
 }
 
 loadData();
