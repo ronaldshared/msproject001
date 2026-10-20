@@ -2,87 +2,77 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>WELLMONT-11 – MS Project Pro + CPM + XML Export</title>
+<title>WELLMONT-11 – MS Project Ultra</title>
 <style>
-  :root {
-    --header-bg: #f3f3f3;
-    --border: #c0c0c0;
-    --critical: #e74c3c;
-    --bar-blue: #5b9bd5;
-    --summary: #2c3e50;
-    --baseline: #9e9e9e;
-    --overalloc: #ff5252;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif}
-  body{background:#e8e8e8;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-
-  .toolbar{background:#2b579a;color:#fff;padding:8px 12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px}
-  .toolbar button,.toolbar select{background:#3b6db0;color:#fff;border:1px solid #1e3f6f;padding:5px 10px;border-radius:3px;cursor:pointer}
-  .toolbar button:hover{background:#4a7bc8}
-  .toolbar button:disabled{opacity:.5;cursor:not-allowed}
-  .toolbar .sep{width:1px;height:22px;background:#5a8ad0;margin:0 4px}
-
-  .main{flex:1;display:flex;overflow:hidden}
-  .left-panel{width:940px;background:#fff;border-right:2px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-  .right-panel{flex:1;overflow:auto;background:#fff;position:relative}
-
-  .grid-header{display:grid;grid-template-columns:34px 1.4fr 55px 85px 85px 45px 95px 130px 70px 55px 55px;background:var(--header-bg);border-bottom:1px solid var(--border);font-weight:600;font-size:11.5px;position:sticky;top:0;z-index:20}
-  .grid-header>div{padding:6px 3px;border-right:1px solid var(--border)}
-
-  .task-row{display:grid;grid-template-columns:34px 1.4fr 55px 85px 85px 45px 95px 130px 70px 55px 55px;border-bottom:1px solid #e0e0e0;font-size:12px;height:28px;align-items:center}
-  .task-row:hover{background:#f0f7ff}
-  .task-row.selected{background:#d6eaf8}
-  .task-row.summary{font-weight:600;background:#f7f7f7}
-  .task-row .id{text-align:center;color:#666}
-  .task-row .name{padding-left:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .task-row .slack{text-align:center}
-  .task-row .slack.zero{color:#c0392b;font-weight:600}
-
-  .timeline-header{display:flex;background:var(--header-bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:15;height:44px}
-  .month-cell{border-right:1px solid var(--border);text-align:center;font-size:12px;font-weight:600;padding-top:4px}
-
-  .bars-container{position:relative}
-  .bar-row{height:28px;position:relative;border-bottom:1px solid #f0f0f0}
-  .bar{position:absolute;height:15px;top:6px;border-radius:3px;color:#fff;font-size:10px;line-height:15px;text-align:center;cursor:move;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.2);overflow:hidden;white-space:nowrap;z-index:3}
-  .bar.critical{background:var(--critical)!important}
-  .bar.summary-bar{background:var(--summary);height:8px;top:9px}
-  .bar .progress{position:absolute;left:0;top:0;height:100%;background:rgba(0,0,0,.28)}
-  .milestone{width:11px;height:11px;background:#2c3e50;transform:rotate(45deg);top:8px}
-  .baseline-bar{position:absolute;height:4px;top:20px;background:var(--baseline);border-radius:1px;opacity:.7;z-index:1}
-  .today-line{position:absolute;top:0;bottom:0;width:2px;background:#e74c3c;z-index:6;pointer-events:none}
-  #depSvg{position:absolute;top:0;left:0;pointer-events:none;z-index:4}
-
-  .resource-view{display:none}.resource-view.active{display:block}
-  .res-header{display:grid;grid-template-columns:200px 1fr;background:var(--header-bg);font-weight:600;padding:8px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-  .res-row{display:grid;grid-template-columns:200px 1fr;border-bottom:1px solid #eee;min-height:38px}
-  .res-name{padding:9px;font-weight:600;background:#f8f8f8;border-right:1px solid var(--border)}
-  .res-name.overallocated{background:#ffebee;color:#c62828}
-  .res-timeline{position:relative;height:100%}
-  .res-bar{position:absolute;height:15px;top:11px;border-radius:3px;font-size:10px;color:#fff;line-height:15px;padding:0 4px;overflow:hidden;white-space:nowrap;cursor:pointer}
-  .res-bar.over{background:var(--overalloc)!important}
-
-  .gantt-view.hidden{display:none}
-  .calendar-view{display:none;padding:16px}.calendar-view.active{display:block}
-
-  .context-menu{position:fixed;background:#fff;border:1px solid #aaa;box-shadow:2px 2px 8px rgba(0,0,0,.2);z-index:1000;display:none;min-width:200px;font-size:13px}
-  .context-menu div{padding:8px 14px;cursor:pointer}
-  .context-menu div:hover{background:#e8f0fe}
-  .context-menu .sep{height:1px;background:#ddd;margin:4px 0;padding:0}
-
-  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;justify-content:center;align-items:center}
-  .modal.show{display:flex}
-  .modal-content{background:#fff;padding:20px;border-radius:6px;width:580px;box-shadow:0 12px 40px rgba(0,0,0,.3);max-height:92vh;overflow-y:auto}
-  .modal-content h3{margin-bottom:12px}
-  .modal-content label{display:block;margin:8px 0 2px;font-size:13px}
-  .modal-content input,.modal-content select{width:100%;padding:6px;margin-bottom:6px}
-  .pred-row{display:flex;gap:6px;margin-bottom:6px;align-items:center}
-  .modal-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-
-  .tooltip{position:fixed;background:#1e1e1e;color:#fff;padding:8px 12px;border-radius:4px;font-size:12px;z-index:200;display:none;max-width:340px;pointer-events:none;line-height:1.4}
+:root{--header-bg:#f3f3f3;--border:#c0c0c0;--critical:#e74c3c;--bar-blue:#5b9bd5;--summary:#2c3e50;--baseline:#9e9e9e;--overalloc:#ff5252}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:#e8e8e8;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.toolbar{background:#2b579a;color:#fff;padding:8px 12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px}
+.toolbar button,.toolbar select,.toolbar input[type="text"]{background:#3b6db0;color:#fff;border:1px solid #1e3f6f;padding:5px 10px;border-radius:3px;cursor:pointer}
+.toolbar input[type="text"]{width:180px;cursor:text}
+.toolbar button:hover{background:#4a7bc8}
+.toolbar button:disabled{opacity:.5;cursor:not-allowed}
+.toolbar .sep{width:1px;height:22px;background:#5a8ad0;margin:0 4px}
+.main{flex:1;display:flex;overflow:hidden}
+.left-panel{width:980px;background:#fff;border-right:2px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.right-panel{flex:1;overflow:auto;background:#fff;position:relative}
+.grid-header{display:grid;grid-template-columns:34px 1.6fr 52px 82px 82px 42px 100px 130px 70px 50px 50px;background:var(--header-bg);border-bottom:1px solid var(--border);font-weight:600;font-size:11.5px;position:sticky;top:0;z-index:20}
+.grid-header>div{padding:6px 3px;border-right:1px solid var(--border)}
+.task-row{display:grid;grid-template-columns:34px 1.6fr 52px 82px 82px 42px 100px 130px 70px 50px 50px;border-bottom:1px solid #e0e0e0;font-size:12px;height:28px;align-items:center}
+.task-row:hover{background:#f0f7ff}
+.task-row.selected{background:#d6eaf8}
+.task-row.summary{font-weight:600;background:#f7f7f7}
+.task-row .id{text-align:center;color:#666}
+.task-row .name{padding-left:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-row .slack{text-align:center}
+.task-row .slack.zero{color:#c0392b;font-weight:600}
+.timeline-header{display:flex;background:var(--header-bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:15;height:44px}
+.month-cell{border-right:1px solid var(--border);text-align:center;font-size:12px;font-weight:600;padding-top:4px}
+.bars-container{position:relative}
+.bar-row{height:28px;position:relative;border-bottom:1px solid #f0f0f0}
+.bar{position:absolute;height:15px;top:6px;border-radius:3px;color:#fff;font-size:10px;line-height:15px;text-align:center;cursor:move;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.2);overflow:hidden;white-space:nowrap;z-index:3}
+.bar.critical{background:var(--critical)!important}
+.bar.summary-bar{background:var(--summary);height:8px;top:9px}
+.bar .progress{position:absolute;left:0;top:0;height:100%;background:rgba(0,0,0,.28)}
+.milestone{width:11px;height:11px;background:#2c3e50;transform:rotate(45deg);top:8px}
+.baseline-bar{position:absolute;height:4px;top:20px;background:var(--baseline);border-radius:1px;opacity:.7;z-index:1}
+.today-line{position:absolute;top:0;bottom:0;width:2px;background:#e74c3c;z-index:6;pointer-events:none}
+#depSvg{position:absolute;top:0;left:0;pointer-events:none;z-index:4}
+.resource-view{display:none}.resource-view.active{display:block}
+.res-header{display:grid;grid-template-columns:200px 1fr;background:var(--header-bg);font-weight:600;padding:8px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.res-row{display:grid;grid-template-columns:200px 1fr;border-bottom:1px solid #eee;min-height:38px}
+.res-name{padding:9px;font-weight:600;background:#f8f8f8;border-right:1px solid var(--border)}
+.res-name.overallocated{background:#ffebee;color:#c62828}
+.res-timeline{position:relative;height:100%}
+.res-bar{position:absolute;height:15px;top:11px;border-radius:3px;font-size:10px;color:#fff;line-height:15px;padding:0 4px;overflow:hidden;white-space:nowrap;cursor:pointer}
+.res-bar.over{background:var(--overalloc)!important}
+.gantt-view.hidden{display:none}
+.calendar-view{display:none;padding:16px;height:100%;overflow:auto}
+.calendar-view.active{display:block}
+.cal-day-name{text-align:center;font-weight:600;padding:8px;background:#eee;border:1px solid #ddd}
+.cal-day{min-height:105px;border:1px solid #ddd;padding:4px;font-size:12px;background:#fafafa;vertical-align:top}
+.cal-day.other{background:#f0f0f0;color:#999}
+.cal-day.today{background:#e3f2fd;border:2px solid #2196f3}
+.cal-day .day-num{font-weight:600;margin-bottom:4px}
+.cal-event{background:#5b9bd5;color:white;padding:2px 5px;margin:2px 0;border-radius:3px;font-size:11px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-event.critical{background:var(--critical)}
+.context-menu{position:fixed;background:#fff;border:1px solid #aaa;box-shadow:2px 2px 8px rgba(0,0,0,.2);z-index:1000;display:none;min-width:200px;font-size:13px}
+.context-menu div{padding:8px 14px;cursor:pointer}
+.context-menu div:hover{background:#e8f0fe}
+.context-menu .sep{height:1px;background:#ddd;margin:4px 0;padding:0}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;justify-content:center;align-items:center}
+.modal.show{display:flex}
+.modal-content{background:#fff;padding:20px;border-radius:6px;width:600px;box-shadow:0 12px 40px rgba(0,0,0,.3);max-height:92vh;overflow-y:auto}
+.modal-content h3{margin-bottom:12px}
+.modal-content label{display:block;margin:8px 0 2px;font-size:13px}
+.modal-content input,.modal-content select, .modal-content textarea{width:100%;padding:6px;margin-bottom:6px}
+.modal-content textarea{height:70px;resize:vertical}
+.pred-row{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+.modal-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.tooltip{position:fixed;background:#1e1e1e;color:#fff;padding:8px 12px;border-radius:4px;font-size:12px;z-index:200;display:none;max-width:360px;pointer-events:none;line-height:1.4}
 </style>
 </head>
 <body>
-
 <div class="toolbar">
   <button onclick="undo()" id="btnUndo" disabled>↶ Deshacer</button>
   <button onclick="redo()" id="btnRedo" disabled>↷ Rehacer</button>
@@ -96,6 +86,8 @@
   <div class="sep"></div>
   <button onclick="toggleExpandAll(true)">Expandir</button>
   <button onclick="toggleExpandAll(false)">Colapsar</button>
+  <div class="sep"></div>
+  <input type="text" id="searchInput" placeholder="Buscar tarea..." oninput="render()">
   <div class="sep"></div>
   <label>Escala:</label>
   <select id="scaleSelect" onchange="changeScale(this.value)">
@@ -117,12 +109,15 @@
   <button onclick="setBaseline()">Baseline</button>
   <button onclick="rescheduleAll()">Recalcular</button>
   <button onclick="exportCSV()">CSV</button>
-  <button onclick="exportMSProjectXML()">Exportar XML MS Project</button>
+  <button onclick="exportMSProjectXML()">XML MS Project</button>
+  <button onclick="document.getElementById('importFile').click()">Importar CSV</button>
+  <input type="file" id="importFile" accept=".csv" style="display:none" onchange="importCSV(event)">
   <div class="sep"></div>
   <button onclick="switchView('gantt')">Gantt</button>
   <button onclick="switchView('resources')">Recursos</button>
   <button onclick="switchView('calendar')">Calendario</button>
   <div class="sep"></div>
+  <button onclick="toggleFullScreen()">⛶ Pantalla completa</button>
   <button onclick="saveData()">💾 Guardar</button>
   <span id="status" style="margin-left:auto;font-size:12px;opacity:.85"></span>
 </div>
@@ -130,37 +125,27 @@
 <div class="main">
   <div class="left-panel">
     <div class="grid-header">
-      <div>ID</div>
-      <div>Nombre de tarea</div>
-      <div>Dur.</div>
-      <div>Inicio</div>
-      <div>Fin</div>
-      <div>%</div>
-      <div>Recurso</div>
-      <div>Predecesoras</div>
-      <div>Restricción</div>
-      <div>H.Total</div>
-      <div>H.Libre</div>
+      <div>ID</div><div>Nombre de tarea</div><div>Dur.</div><div>Inicio</div><div>Fin</div><div>%</div>
+      <div>Recurso</div><div>Predecesoras</div><div>Restricción</div><div>H.Total</div><div>H.Libre</div>
     </div>
     <div id="taskList" style="overflow-y:auto;flex:1"></div>
   </div>
-
-  <div class="right-panel">
+  <div class="right-panel" id="rightPanel">
     <div class="gantt-view" id="ganttView">
       <div class="timeline-header" id="timelineHeader"></div>
       <div class="bars-container" id="barsContainer"><svg id="depSvg"></svg></div>
     </div>
     <div class="resource-view" id="resourceView">
-      <div class="res-header"><div>Recurso</div><div id="resTimelineHeader"></div></div>
+      <div class="res-header"><div>Recurso</div><div></div></div>
       <div id="resourceList"></div>
     </div>
     <div class="calendar-view" id="calendarView">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <button onclick="changeCalMonth(-1)">‹ Anterior</button>
-        <h2 id="calTitle"></h2>
-        <button onclick="changeCalMonth(1)">Siguiente ›</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <button onclick="changeCalMonth(-1)">‹ Mes anterior</button>
+        <h2 id="calTitle" style="margin:0"></h2>
+        <button onclick="changeCalMonth(1)">Mes siguiente ›</button>
       </div>
-      <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+      <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:0;border:1px solid #ccc"></div>
     </div>
   </div>
 </div>
@@ -179,16 +164,11 @@
 <div class="modal" id="editModal">
   <div class="modal-content">
     <h3 id="modalTitle">Editar tarea</h3>
-    <label>Nombre</label>
-    <input type="text" id="mName">
-    <label>Duración (días laborables)</label>
-    <input type="number" id="mDuration" min="0">
-    <label>Inicio</label>
-    <input type="date" id="mStart">
-    <label>% Completado</label>
-    <input type="number" id="mPercent" min="0" max="100">
-    <label>Recurso</label>
-    <input type="text" id="mResource">
+    <label>Nombre</label><input type="text" id="mName">
+    <label>Duración (días laborables)</label><input type="number" id="mDuration" min="0">
+    <label>Inicio</label><input type="date" id="mStart">
+    <label>% Completado</label><input type="number" id="mPercent" min="0" max="100">
+    <label>Recurso</label><input type="text" id="mResource">
     <label>Restricción</label>
     <select id="mConstraint">
       <option value="ASAP">Lo antes posible</option>
@@ -198,15 +178,14 @@
       <option value="SNET">No empezar antes de</option>
       <option value="SNLT">No empezar después de</option>
     </select>
-    <label>Fecha de restricción</label>
-    <input type="date" id="mConstraintDate">
+    <label>Fecha de restricción</label><input type="date" id="mConstraintDate">
     <label>Es tarea resumen</label>
     <select id="mSummary"><option value="false">No</option><option value="true">Sí</option></select>
-
+    <label>Notas</label>
+    <textarea id="mNotes" placeholder="Notas de la tarea..."></textarea>
     <label style="margin-top:14px">Predecesoras</label>
     <div id="predList"></div>
     <button onclick="addPredRow()" style="margin-top:6px">+ Añadir predecesora</button>
-
     <div class="modal-buttons">
       <button onclick="closeModal()">Cancelar</button>
       <button onclick="saveTask()" style="background:#2b579a;color:#fff">Guardar</button>
@@ -217,76 +196,43 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-/* ===================== ESTADO + HISTORIAL ===================== */
-let tasks = [];
-let selectedId = null;
-let scale = 'week';
-let dayWidth = 11;
-let currentFilter = 'all';
-let currentView = 'gantt';
-let calYear = 2019, calMonth = 6;
-let editingId = null;
-
-let history = [];
-let historyIndex = -1;
+/* ========== ESTADO ========== */
+let tasks = [], selectedId = null, scale = 'week', dayWidth = 11, currentFilter = 'all', currentView = 'gantt';
+let calYear = 2019, calMonth = 6, editingId = null;
+let history = [], historyIndex = -1;
 const MAX_HISTORY = 40;
 
 function pushHistory() {
   history = history.slice(0, historyIndex + 1);
   history.push(JSON.stringify(tasks));
-  if (history.length > MAX_HISTORY) history.shift();
-  else historyIndex++;
+  if (history.length > MAX_HISTORY) history.shift(); else historyIndex++;
   updateUndoRedoButtons();
 }
-function undo() {
-  if (historyIndex <= 0) return;
-  historyIndex--;
-  tasks = JSON.parse(history[historyIndex]);
-  render();
-  updateUndoRedoButtons();
-}
-function redo() {
-  if (historyIndex >= history.length - 1) return;
-  historyIndex++;
-  tasks = JSON.parse(history[historyIndex]);
-  render();
-  updateUndoRedoButtons();
-}
+function undo() { if (historyIndex <= 0) return; historyIndex--; tasks = JSON.parse(history[historyIndex]); render(); updateUndoRedoButtons(); }
+function redo() { if (historyIndex >= history.length - 1) return; historyIndex++; tasks = JSON.parse(history[historyIndex]); render(); updateUndoRedoButtons(); }
 function updateUndoRedoButtons() {
   document.getElementById('btnUndo').disabled = historyIndex <= 0;
   document.getElementById('btnRedo').disabled = historyIndex >= history.length - 1;
 }
 
-/* ===================== CALENDARIO LABORAL ===================== */
-function isWorkingDay(date) {
-  const day = date.getDay();
-  return day !== 0 && day !== 6;
+/* ========== CALENDARIO LABORAL ========== */
+function isWorkingDay(d) { const day = d.getDay(); return day !== 0 && day !== 6; }
+function addWorkingDays(start, days) {
+  if (days === 0) return new Date(start);
+  let r = new Date(start), added = 0, dir = days > 0 ? 1 : -1, abs = Math.abs(days);
+  while (added < abs) { r.setDate(r.getDate() + dir); if (isWorkingDay(r)) added++; }
+  return r;
 }
-function addWorkingDays(startDate, days) {
-  if (days === 0) return new Date(startDate);
-  let result = new Date(startDate);
-  let added = 0;
-  const direction = days > 0 ? 1 : -1;
-  const absDays = Math.abs(days);
-  while (added < absDays) {
-    result.setDate(result.getDate() + direction);
-    if (isWorkingDay(result)) added++;
-  }
-  return result;
-}
-function daysBetween(a, b) {
-  return Math.round((b - a) / 86400000);
-}
+function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
 
-/* ===================== UTILIDADES ===================== */
+/* ========== UTILIDADES ========== */
 const parseDate = s => new Date(s + 'T00:00:00');
-const formatDate = d => d.toISOString().slice(0,10);
+const formatDate = d => d.toISOString().slice(0, 10);
 const getFinish = t => addWorkingDays(parseDate(t.start), t.duration);
 
-function calculateStartFromPred(task, predTask, type, lag) {
-  const pStart = parseDate(predTask.start);
-  const pFinish = getFinish(predTask);
-  switch(type) {
+function calculateStartFromPred(task, pred, type, lag) {
+  const pStart = parseDate(pred.start), pFinish = getFinish(pred);
+  switch (type) {
     case 'FS': return addWorkingDays(pFinish, lag);
     case 'SS': return addWorkingDays(pStart, lag);
     case 'FF': return addWorkingDays(addWorkingDays(pFinish, lag), -task.duration);
@@ -295,81 +241,61 @@ function calculateStartFromPred(task, predTask, type, lag) {
   }
 }
 
-/* ===================== CPM ===================== */
+/* ========== CPM ========== */
 function runCPM() {
   tasks.forEach(t => { t.es = 0; t.ef = t.duration; });
-
   let changed = true, safety = 0;
   while (changed && safety < 50) {
     changed = false; safety++;
     tasks.forEach(t => {
-      if (!t.preds || !t.preds.length) return;
+      if (!t.preds?.length) return;
       let maxES = 0;
       t.preds.forEach(p => {
         const pred = tasks.find(x => x.id === p.id);
         if (!pred) return;
-        let candidate = 0;
-        if (p.type === 'FS') candidate = pred.ef + (p.lag || 0);
-        else if (p.type === 'SS') candidate = pred.es + (p.lag || 0);
-        else if (p.type === 'FF') candidate = pred.ef + (p.lag || 0) - t.duration;
-        else if (p.type === 'SF') candidate = pred.es + (p.lag || 0) - t.duration;
-        if (candidate > maxES) maxES = candidate;
+        let c = 0;
+        if (p.type === 'FS') c = pred.ef + (p.lag || 0);
+        else if (p.type === 'SS') c = pred.es + (p.lag || 0);
+        else if (p.type === 'FF') c = pred.ef + (p.lag || 0) - t.duration;
+        else if (p.type === 'SF') c = pred.es + (p.lag || 0) - t.duration;
+        if (c > maxES) maxES = c;
       });
-      if (maxES > t.es) {
-        t.es = maxES;
-        t.ef = t.es + t.duration;
-        changed = true;
-      }
+      if (maxES > t.es) { t.es = maxES; t.ef = t.es + t.duration; changed = true; }
     });
   }
-
   const projectEF = Math.max(...tasks.map(t => t.ef), 0);
-  tasks.forEach(t => {
-    t.lf = projectEF;
-    t.ls = t.lf - t.duration;
-  });
-
+  tasks.forEach(t => { t.lf = projectEF; t.ls = t.lf - t.duration; });
   changed = true; safety = 0;
   while (changed && safety < 50) {
     changed = false; safety++;
     for (let i = tasks.length - 1; i >= 0; i--) {
       const t = tasks[i];
-      const successors = tasks.filter(s => (s.preds || []).some(p => p.id === t.id));
-      if (successors.length === 0) continue;
+      const succs = tasks.filter(s => (s.preds || []).some(p => p.id === t.id));
+      if (!succs.length) continue;
       let minLS = Infinity;
-      successors.forEach(s => {
+      succs.forEach(s => {
         const link = s.preds.find(p => p.id === t.id);
-        let candidate = s.ls - (link.lag || 0);
-        if (candidate < minLS) minLS = candidate;
+        let c = s.ls - (link.lag || 0);
+        if (c < minLS) minLS = c;
       });
-      if (minLS < t.lf) {
-        t.lf = minLS;
-        t.ls = t.lf - t.duration;
-        changed = true;
-      }
+      if (minLS < t.lf) { t.lf = minLS; t.ls = t.lf - t.duration; changed = true; }
     }
   }
-
   tasks.forEach(t => {
     t.totalSlack = t.ls - t.es;
-    const successors = tasks.filter(s => (s.preds || []).some(p => p.id === t.id));
-    if (successors.length === 0) t.freeSlack = t.totalSlack;
-    else {
-      const minSuccES = Math.min(...successors.map(s => s.es));
-      t.freeSlack = Math.max(0, minSuccES - t.ef);
-    }
+    const succs = tasks.filter(s => (s.preds || []).some(p => p.id === t.id));
+    t.freeSlack = succs.length ? Math.max(0, Math.min(...succs.map(s => s.es)) - t.ef) : t.totalSlack;
     t.critical = t.totalSlack <= 0;
   });
   render();
 }
 
-/* ===================== RESCHEDULE ===================== */
 function rescheduleAll() {
   let changed = true, safety = 0;
   while (changed && safety < 40) {
     changed = false; safety++;
     tasks.forEach(t => {
-      if (!t.preds || !t.preds.length) return;
+      if (!t.preds?.length) return;
       let latest = null;
       t.preds.forEach(p => {
         const pred = tasks.find(x => x.id === p.id);
@@ -386,203 +312,134 @@ function rescheduleAll() {
   runCPM();
 }
 
-/* ===================== EXPORTAR XML MICROSOFT PROJECT ===================== */
-function exportMSProjectXML() {
-  const escapeXml = (str) => String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+/* ========== EXPORT / IMPORT ========== */
+function exportCSV() {
+  let csv = 'ID,Nombre,Duración,Inicio,Fin,%,Recurso,Predecesoras,Restricción,HolguraTotal,HolguraLibre,Crítica,Nivel,Summary,Notas\n';
+  tasks.forEach(t => {
+    const pred = (t.preds || []).map(p => `${p.id}${p.type}${p.lag || ''}`).join(';');
+    csv += `${t.id},"${t.name}",${t.duration},${t.start},${formatDate(getFinish(t))},${t.percent},"${t.resource || ''}","${pred}",${t.constraint},${t.totalSlack || 0},${t.freeSlack || 0},${t.critical},${t.level},${t.summary},"${(t.notes || '').replace(/"/g, '""')}"\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = 'wellmont.csv';
+  a.click();
+}
 
-  // Recursos únicos
-  const resourceNames = [...new Set(tasks.filter(t => t.resource).map(t => t.resource))];
-  const resourceMap = {};
-  resourceNames.forEach((name, i) => resourceMap[name] = i + 1);
+function importCSV(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const lines = ev.target.result.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return alert('CSV vacío');
+    const newTasks = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g, '').trim()) || lines[i].split(',');
+      if (cols.length < 5) continue;
+      const preds = [];
+      if (cols[7]) {
+        cols[7].split(';').forEach(p => {
+          const m = p.match(/(\d+)(FS|SS|FF|SF)?([+-]?\d+)?/);
+          if (m) preds.push({ id: +m[1], type: m[2] || 'FS', lag: +(m[3] || 0) });
+        });
+      }
+      newTasks.push({
+        id: +cols[0] || i, name: cols[1] || 'Tarea', duration: +cols[2] || 0,
+        start: cols[3] || formatDate(new Date()), percent: +cols[5] || 0,
+        resource: cols[6] || '', preds, constraint: cols[8] || 'ASAP', constraintDate: '',
+        level: +cols[12] || 0, summary: cols[13] === 'true' || cols[13] === '1',
+        notes: cols[14] || '', collapsed: false, critical: false, baselineStart: null, baselineDuration: null
+      });
+    }
+    if (newTasks.length) {
+      tasks = newTasks;
+      pushHistory();
+      runCPM();
+      alert(`Importadas ${newTasks.length} tareas`);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function exportMSProjectXML() {
+  const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const resNames = [...new Set(tasks.filter(t => t.resource).map(t => t.resource))];
+  const resMap = {};
+  resNames.forEach((n, i) => resMap[n] = i + 1);
 
   let xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Project xmlns="http://schemas.microsoft.com/project">
   <SaveVersion>14</SaveVersion>
   <Name>WELLMONT-11</Name>
   <Title>WELLMONT-11</Title>
-  <Company>Gantt Web Pro</Company>
-  <Author>Grok Export</Author>
   <CreationDate>${new Date().toISOString()}</CreationDate>
   <ScheduleFromStart>1</ScheduleFromStart>
-  <StartDate>${tasks.length ? tasks[0].start : '2019-06-01'}T08:00:00</StartDate>
-  <FYStartDate>1</FYStartDate>
-  <CriticalSlackLimit>0</CriticalSlackLimit>
-  <CurrencyDigits>2</CurrencyDigits>
-  <CurrencySymbol>$</CurrencySymbol>
-  <CurrencyCode>USD</CurrencyCode>
+  <StartDate>${tasks[0]?.start || '2019-06-01'}T08:00:00</StartDate>
   <CalendarUID>1</CalendarUID>
-  <DefaultStartTime>08:00:00</DefaultStartTime>
-  <DefaultFinishTime>17:00:00</DefaultFinishTime>
   <MinutesPerDay>480</MinutesPerDay>
   <MinutesPerWeek>2400</MinutesPerWeek>
   <DaysPerMonth>20</DaysPerMonth>
-  <DefaultTaskType>0</DefaultTaskType>
-  <DefaultFixedCostAccrual>2</DefaultFixedCostAccrual>
-  <DefaultTaskEVMethod>0</DefaultTaskEVMethod>
-  <ProjectExternallyEdited>0</ProjectExternallyEdited>
-
-  <Calendars>
-    <Calendar>
-      <UID>1</UID>
-      <Name>Standard</Name>
-      <IsBaseCalendar>1</IsBaseCalendar>
-      <BaseCalendarUID>-1</BaseCalendarUID>
-      <WeekDays>
-        <WeekDay><DayType>1</DayType><DayWorking>0</DayWorking></WeekDay>
-        <WeekDay><DayType>2</DayType><DayWorking>1</DayWorking>
-          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
-          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
-        </WeekDay>
-        <WeekDay><DayType>3</DayType><DayWorking>1</DayWorking>
-          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
-          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
-        </WeekDay>
-        <WeekDay><DayType>4</DayType><DayWorking>1</DayWorking>
-          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
-          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
-        </WeekDay>
-        <WeekDay><DayType>5</DayType><DayWorking>1</DayWorking>
-          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
-          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
-        </WeekDay>
-        <WeekDay><DayType>6</DayType><DayWorking>1</DayWorking>
-          <WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime>
-          <WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes>
-        </WeekDay>
-        <WeekDay><DayType>7</DayType><DayWorking>0</DayWorking></WeekDay>
-      </WeekDays>
-    </Calendar>
-  </Calendars>
-
+  <Calendars><Calendar><UID>1</UID><Name>Standard</Name><IsBaseCalendar>1</IsBaseCalendar>
+    <WeekDays>
+      <WeekDay><DayType>1</DayType><DayWorking>0</DayWorking></WeekDay>
+      <WeekDay><DayType>2</DayType><DayWorking>1</DayWorking><WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime><WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes></WeekDay>
+      <WeekDay><DayType>3</DayType><DayWorking>1</DayWorking><WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime><WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes></WeekDay>
+      <WeekDay><DayType>4</DayType><DayWorking>1</DayWorking><WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime><WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes></WeekDay>
+      <WeekDay><DayType>5</DayType><DayWorking>1</DayWorking><WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime><WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes></WeekDay>
+      <WeekDay><DayType>6</DayType><DayWorking>1</DayWorking><WorkingTimes><WorkingTime><FromTime>08:00:00</FromTime><ToTime>12:00:00</ToTime></WorkingTime><WorkingTime><FromTime>13:00:00</FromTime><ToTime>17:00:00</ToTime></WorkingTime></WorkingTimes></WeekDay>
+      <WeekDay><DayType>7</DayType><DayWorking>0</DayWorking></WeekDay>
+    </WeekDays>
+  </Calendar></Calendars>
   <Tasks>
 `;
 
-  tasks.forEach((t, index) => {
-    const start = t.start + 'T08:00:00';
-    const finish = formatDate(getFinish(t)) + 'T17:00:00';
-    const outlineLevel = (t.level || 0) + 1;
-    const isSummary = t.summary ? 1 : 0;
-    const isMilestone = t.duration === 0 ? 1 : 0;
-    const percent = t.percent || 0;
-
+  tasks.forEach((t, idx) => {
     xml += `    <Task>
-      <UID>${t.id}</UID>
-      <ID>${index + 1}</ID>
-      <Name>${escapeXml(t.name)}</Name>
-      <Type>0</Type>
-      <IsNull>0</IsNull>
-      <OutlineLevel>${outlineLevel}</OutlineLevel>
-      <OutlineNumber>${outlineLevel}</OutlineNumber>
-      <WBS>${t.id}</WBS>
-      <Summary>${isSummary}</Summary>
-      <Critical>${t.critical ? 1 : 0}</Critical>
-      <Priority>500</Priority>
-      <Start>${start}</Start>
-      <Finish>${finish}</Finish>
-      <Duration>PT${t.duration * 8}H0M0S</Duration>
+      <UID>${t.id}</UID><ID>${idx+1}</ID><Name>${esc(t.name)}</Name>
+      <OutlineLevel>${(t.level||0)+1}</OutlineLevel>
+      <Summary>${t.summary?1:0}</Summary>
+      <Critical>${t.critical?1:0}</Critical>
+      <Start>${t.start}T08:00:00</Start>
+      <Finish>${formatDate(getFinish(t))}T17:00:00</Finish>
+      <Duration>PT${t.duration*8}H0M0S</Duration>
       <DurationFormat>7</DurationFormat>
-      <Work>PT${t.duration * 8}H0M0S</Work>
-      <PercentComplete>${percent}</PercentComplete>
-      <PercentWorkComplete>${percent}</PercentWorkComplete>
-      <Milestone>${isMilestone}</Milestone>
-      <FixedCostAccrual>2</FixedCostAccrual>
-      <ConstraintType>0</ConstraintType>
-      <CalendarUID>-1</CalendarUID>
+      <PercentComplete>${t.percent||0}</PercentComplete>
+      <Milestone>${t.duration===0?1:0}</Milestone>
+      <Notes>${esc(t.notes||'')}</Notes>
 `;
-
-    // Predecessors
-    if (t.preds && t.preds.length) {
-      t.preds.forEach((p, i) => {
-        // MS Project Link types: 0=FF, 1=FS, 2=SF, 3=SS
-        let linkType = 1; // FS
-        if (p.type === 'SS') linkType = 3;
-        else if (p.type === 'FF') linkType = 0;
-        else if (p.type === 'SF') linkType = 2;
-
-        xml += `      <PredecessorLink>
-        <PredecessorUID>${p.id}</PredecessorUID>
-        <Type>${linkType}</Type>
-        <CrossProject>0</CrossProject>
-        <LinkLag>${(p.lag || 0) * 4800}</LinkLag>
-        <LagFormat>7</LagFormat>
-      </PredecessorLink>
-`;
-      });
-    }
-
-    xml += `    </Task>
-`;
+    (t.preds||[]).forEach(p => {
+      let lt = 1;
+      if (p.type === 'SS') lt = 3; else if (p.type === 'FF') lt = 0; else if (p.type === 'SF') lt = 2;
+      xml += `      <PredecessorLink><PredecessorUID>${p.id}</PredecessorUID><Type>${lt}</Type><LinkLag>${(p.lag||0)*4800}</LinkLag><LagFormat>7</LagFormat></PredecessorLink>\n`;
+    });
+    xml += `    </Task>\n`;
   });
 
-  xml += `  </Tasks>
-
-  <Resources>
-`;
-
-  resourceNames.forEach((name, i) => {
-    xml += `    <Resource>
-      <UID>${i + 1}</UID>
-      <ID>${i + 1}</ID>
-      <Name>${escapeXml(name)}</Name>
-      <Type>1</Type>
-      <IsNull>0</IsNull>
-      <MaxUnits>1.00</MaxUnits>
-      <PeakUnits>1.00</PeakUnits>
-      <OverAllocated>0</OverAllocated>
-      <CanLevel>1</CanLevel>
-      <AccrueAt>3</AccrueAt>
-    </Resource>
-`;
+  xml += `  </Tasks><Resources>\n`;
+  resNames.forEach((n,i) => {
+    xml += `    <Resource><UID>${i+1}</UID><ID>${i+1}</ID><Name>${esc(n)}</Name><Type>1</Type><MaxUnits>1.00</MaxUnits></Resource>\n`;
   });
-
-  xml += `  </Resources>
-
-  <Assignments>
-`;
-
-  let assignUID = 1;
+  xml += `  </Resources><Assignments>\n`;
+  let auid = 1;
   tasks.forEach(t => {
-    if (!t.resource || !resourceMap[t.resource]) return;
-    const resUID = resourceMap[t.resource];
-    const start = t.start + 'T08:00:00';
-    const finish = formatDate(getFinish(t)) + 'T17:00:00';
-
-    xml += `    <Assignment>
-      <UID>${assignUID++}</UID>
-      <TaskUID>${t.id}</TaskUID>
-      <ResourceUID>${resUID}</ResourceUID>
-      <PercentWorkComplete>${t.percent || 0}</PercentWorkComplete>
-      <Units>1.0</Units>
-      <Work>PT${t.duration * 8}H0M0S</Work>
-      <Start>${start}</Start>
-      <Finish>${finish}</Finish>
-    </Assignment>
-`;
+    if (!t.resource || !resMap[t.resource]) return;
+    xml += `    <Assignment><UID>${auid++}</UID><TaskUID>${t.id}</TaskUID><ResourceUID>${resMap[t.resource]}</ResourceUID><Units>1.0</Units>
+      <Work>PT${t.duration*8}H0M0S</Work><Start>${t.start}T08:00:00</Start><Finish>${formatDate(getFinish(t))}T17:00:00</Finish></Assignment>\n`;
   });
+  xml += `  </Assignments></Project>`;
 
-  xml += `  </Assignments>
-</Project>`;
-
-  // Descargar
-  const blob = new Blob([xml], { type: 'application/xml' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = URL.createObjectURL(new Blob([xml], {type:'application/xml'}));
   a.download = 'WELLMONT-11.xml';
   a.click();
-  URL.revokeObjectURL(a.href);
-
-  alert('Archivo XML generado.\nÁbrelo con Microsoft Project (Archivo → Abrir → seleccionar el .xml)');
+  alert('XML generado correctamente');
 }
 
-/* ===================== RENDER y resto de funciones ===================== */
-// (Aquí van exactamente las mismas funciones de render, drag, modal, etc. de la versión anterior)
-// Para no hacer este mensaje excesivamente largo, el resto del código (renderTaskList, renderTimeline, drawDependencies, 
-// Resource View, Drag, Context Menu, Keyboard, CRUD, loadData, etc.) es idéntico a la versión anterior.
-
-// Por favor, combina este export con el código completo de la respuesta anterior.
-// Si quieres el archivo 100% completo en un solo bloque, dímelo y te lo entrego entero otra vez.
-
+/* ========== RENDER ========== */
 function passesFilter(t) {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  if (search && !t.name.toLowerCase().includes(search)) return false;
   if (currentFilter === 'all') return true;
   if (currentFilter === 'critical') return t.critical;
   if (currentFilter === 'incomplete') return t.percent < 100;
@@ -590,7 +447,6 @@ function passesFilter(t) {
   if (currentFilter === 'delayed') return t.baselineStart && parseDate(t.start) > parseDate(t.baselineStart);
   return true;
 }
-
 function isHidden(task) {
   let level = task.level;
   for (let i = tasks.indexOf(task) - 1; i >= 0; i--) {
@@ -601,31 +457,430 @@ function isHidden(task) {
   }
   return false;
 }
-
 function render() {
-  if (currentView === 'gantt') {
-    renderTaskList();
-    renderTimeline();
-    drawDependencies();
-  } else if (currentView === 'resources') {
-    renderResourceView();
-  } else {
-    renderCalendar();
+  if (currentView === 'gantt') { renderTaskList(); renderTimeline(); drawDependencies(); }
+  else if (currentView === 'resources') renderResourceView();
+  else renderCalendar();
+}
+
+function renderTaskList() {
+  const c = document.getElementById('taskList');
+  c.innerHTML = '';
+  tasks.forEach(t => {
+    if (isHidden(t) || !passesFilter(t)) return;
+    const row = document.createElement('div');
+    row.className = 'task-row' + (t.summary ? ' summary' : '') + (t.id === selectedId ? ' selected' : '');
+    row.onclick = () => { selectedId = t.id; render(); };
+    row.oncontextmenu = e => { e.preventDefault(); selectedId = t.id; showContextMenu(e.pageX, e.pageY); render(); };
+    const indent = '&nbsp;'.repeat(t.level * 3);
+    const toggle = t.summary ? `<span onclick="event.stopPropagation();toggleCollapse(${t.id})" style="cursor:pointer;margin-right:3px">${t.collapsed ? '▶' : '▼'}</span>` : '';
+    const predText = (t.preds || []).map(p => `${p.id}${p.type}${p.lag ? (p.lag > 0 ? '+' : '') + p.lag + 'd' : ''}`).join(', ') || '—';
+    const consText = t.constraint === 'ASAP' ? 'ASAP' : (t.constraint + (t.constraintDate ? ' ' + t.constraintDate : ''));
+    row.innerHTML = `
+      <div class="id">${t.id}</div>
+      <div class="name" title="${t.notes || ''}">${toggle}${indent}${t.name}</div>
+      <div>${t.duration}d</div>
+      <div>${t.start}</div>
+      <div>${formatDate(getFinish(t))}</div>
+      <div>${t.percent}%</div>
+      <div>${t.resource || '—'}</div>
+      <div title="${predText}">${predText}</div>
+      <div title="${consText}">${consText}</div>
+      <div class="slack ${t.totalSlack === 0 ? 'zero' : ''}">${t.totalSlack ?? '-'}</div>
+      <div class="slack">${t.freeSlack ?? '-'}</div>`;
+    c.appendChild(row);
+  });
+}
+
+function renderTimeline() {
+  dayWidth = scale === 'day' ? 22 : (scale === 'week' ? 10 : 3.4);
+  const header = document.getElementById('timelineHeader');
+  const bars = document.getElementById('barsContainer');
+  const svg = document.getElementById('depSvg');
+  header.innerHTML = '';
+  while (bars.children.length > 1) bars.removeChild(bars.lastChild);
+  const minD = parseDate('2019-06-01');
+  const maxD = parseDate('2019-09-25');
+  const totalDays = daysBetween(minD, maxD) + 1;
+  const totalWidth = totalDays * dayWidth;
+  let html = '', cur = new Date(minD);
+  while (cur <= maxD) {
+    const label = cur.toLocaleString('es', { month: 'short', year: '2-digit' });
+    const days = scale === 'month' ? 30 : (scale === 'week' ? 7 : 1);
+    html += `<div class="month-cell" style="width:${days * dayWidth}px">${label}</div>`;
+    cur.setDate(cur.getDate() + days);
+  }
+  header.innerHTML = html;
+  header.style.width = totalWidth + 'px';
+  const visible = [];
+  tasks.forEach(t => {
+    if (isHidden(t) || !passesFilter(t)) return;
+    visible.push(t);
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.style.width = totalWidth + 'px';
+    row.dataset.id = t.id;
+    if (t.baselineStart) {
+      const bOff = daysBetween(minD, parseDate(t.baselineStart)) * dayWidth;
+      const bW = Math.max((t.baselineDuration || t.duration) * dayWidth, 4);
+      const base = document.createElement('div');
+      base.className = 'baseline-bar';
+      base.style.left = bOff + 'px';
+      base.style.width = bW + 'px';
+      row.appendChild(base);
+    }
+    const startOff = daysBetween(minD, parseDate(t.start)) * dayWidth;
+    const w = Math.max(t.duration * dayWidth, t.duration === 0 ? 11 : 5);
+    const bar = document.createElement('div');
+    bar.className = 'bar' + (t.duration === 0 ? ' milestone' : '') + (t.summary ? ' summary-bar' : '') + (t.critical ? ' critical' : '');
+    bar.style.left = startOff + 'px';
+    bar.style.width = (t.duration === 0 ? 11 : w) + 'px';
+    bar.style.background = t.critical ? 'var(--critical)' : (t.summary ? 'var(--summary)' : 'var(--bar-blue)');
+    if (t.duration > 0) bar.innerHTML = `<div class="progress" style="width:${t.percent}%"></div>${t.duration > 3 ? t.name.substring(0, 14) : ''}`;
+    bar.onmousedown = e => startDrag(e, t, bar);
+    bar.onmouseenter = e => showTooltip(e, t);
+    bar.onmouseleave = hideTooltip;
+    bar.oncontextmenu = e => { e.preventDefault(); selectedId = t.id; showContextMenu(e.pageX, e.pageY); };
+    row.appendChild(bar);
+    bars.appendChild(row);
+  });
+  const todayX = daysBetween(minD, parseDate('2019-07-15')) * dayWidth;
+  const line = document.createElement('div');
+  line.className = 'today-line';
+  line.style.left = todayX + 'px';
+  bars.appendChild(line);
+  bars.style.width = totalWidth + 'px';
+  bars.style.height = (visible.length * 28) + 'px';
+  svg.style.width = totalWidth + 'px';
+  svg.style.height = (visible.length * 28) + 'px';
+}
+
+function drawDependencies() {
+  const svg = document.getElementById('depSvg');
+  svg.innerHTML = '';
+  const rows = [...document.querySelectorAll('.bar-row')];
+  const idToIdx = {};
+  rows.forEach((r, i) => idToIdx[r.dataset.id] = i);
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  defs.innerHTML = `<marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#555"/></marker>`;
+  svg.appendChild(defs);
+  tasks.forEach(t => {
+    if (!t.preds || isHidden(t) || !passesFilter(t)) return;
+    t.preds.forEach(p => {
+      const pred = tasks.find(x => x.id === p.id);
+      if (!pred || isHidden(pred) || !passesFilter(pred)) return;
+      const fromIdx = idToIdx[pred.id], toIdx = idToIdx[t.id];
+      if (fromIdx === undefined || toIdx === undefined) return;
+      const fromBar = rows[fromIdx].querySelector('.bar');
+      const toBar = rows[toIdx].querySelector('.bar');
+      if (!fromBar || !toBar) return;
+      const fl = parseFloat(fromBar.style.left), fw = parseFloat(fromBar.style.width);
+      const tl = parseFloat(toBar.style.left), tw = parseFloat(toBar.style.width);
+      let x1 = (p.type === 'FS' || p.type === 'FF') ? fl + fw : fl;
+      let x2 = (p.type === 'FS' || p.type === 'SS') ? tl : tl + tw;
+      const y1 = fromIdx * 28 + 14, y2 = toIdx * 28 + 14;
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M${x1},${y1} H${x1+12} V${y2} H${x2}`);
+      path.setAttribute('stroke', t.critical ? '#c0392b' : '#555');
+      path.setAttribute('stroke-width', '1.4');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('marker-end', 'url(#arrow)');
+      svg.appendChild(path);
+    });
+  });
+}
+
+function renderResourceView() {
+  const list = document.getElementById('resourceList');
+  list.innerHTML = '';
+  const minD = parseDate('2019-06-01');
+  const totalWidth = daysBetween(minD, parseDate('2019-09-25')) * dayWidth + dayWidth;
+  const resMap = {};
+  tasks.forEach(t => {
+    if (!t.resource || t.summary) return;
+    if (!resMap[t.resource]) resMap[t.resource] = [];
+    resMap[t.resource].push(t);
+  });
+  Object.keys(resMap).sort().forEach(name => {
+    const ts = resMap[name];
+    let over = false;
+    for (let i = 0; i < ts.length; i++) {
+      for (let j = i + 1; j < ts.length; j++) {
+        const aS = parseDate(ts[i].start), aF = getFinish(ts[i]);
+        const bS = parseDate(ts[j].start), bF = getFinish(ts[j]);
+        if (aS < bF && bS < aF) { over = true; break; }
+      }
+    }
+    const row = document.createElement('div');
+    row.className = 'res-row';
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'res-name' + (over ? ' overallocated' : '');
+    nameDiv.innerHTML = over ? `⚠ ${name}` : name;
+    row.appendChild(nameDiv);
+    const timeline = document.createElement('div');
+    timeline.className = 'res-timeline';
+    timeline.style.width = totalWidth + 'px';
+    timeline.style.height = '38px';
+    ts.forEach(t => {
+      const left = daysBetween(minD, parseDate(t.start)) * dayWidth;
+      const w = Math.max(t.duration * dayWidth, 8);
+      const bar = document.createElement('div');
+      bar.className = 'res-bar' + (over ? ' over' : '');
+      bar.style.left = left + 'px';
+      bar.style.width = w + 'px';
+      bar.style.background = t.critical ? 'var(--critical)' : 'var(--bar-blue)';
+      bar.textContent = t.name.substring(0, 16);
+      bar.onclick = () => { selectedId = t.id; switchView('gantt'); };
+      timeline.appendChild(bar);
+    });
+    row.appendChild(timeline);
+    list.appendChild(row);
+  });
+}
+
+function renderCalendar() {
+  const title = document.getElementById('calTitle');
+  const grid = document.getElementById('calGrid');
+  const monthNames = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  title.textContent = `${monthNames[calMonth]} ${calYear}`;
+  grid.innerHTML = '';
+  ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-name';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+  const first = new Date(calYear, calMonth - 1, 1);
+  let startWD = first.getDay() || 7;
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const todayStr = formatDate(new Date());
+  for (let i = 1; i < startWD; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day other';
+    grid.appendChild(el);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const el = document.createElement('div');
+    const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    el.className = 'cal-day' + (dateStr === todayStr ? ' today' : '');
+    el.innerHTML = `<div class="day-num">${d}</div>`;
+    tasks.forEach(t => {
+      if (!passesFilter(t) || t.summary) return;
+      const s = parseDate(t.start), f = getFinish(t), c = parseDate(dateStr);
+      if (c >= s && c <= f) {
+        const ev = document.createElement('div');
+        ev.className = 'cal-event' + (t.critical ? ' critical' : '');
+        ev.textContent = t.name;
+        ev.title = `${t.name}\n${t.start} → ${formatDate(getFinish(t))}\n${t.notes || ''}`;
+        ev.onclick = () => { selectedId = t.id; editSelected(); };
+        el.appendChild(ev);
+      }
+    });
+    grid.appendChild(el);
   }
 }
 
-// ... (el resto de funciones se mantienen igual que en la versión anterior)
+/* ========== DRAG + ZOOM ========== */
+let dragState = null;
+function startDrag(e, task, bar) {
+  e.preventDefault();
+  dragState = { task, bar, startX: e.clientX, origLeft: parseFloat(bar.style.left), origW: parseFloat(bar.style.width), isResize: e.offsetX > parseFloat(bar.style.width) - 8 };
+  document.onmousemove = e => {
+    if (!dragState) return;
+    const dx = e.clientX - dragState.startX;
+    if (dragState.isResize) dragState.bar.style.width = Math.max(dayWidth, dragState.origW + dx) + 'px';
+    else dragState.bar.style.left = (dragState.origLeft + dx) + 'px';
+  };
+  document.onmouseup = () => {
+    if (!dragState) return;
+    const { task, bar, origLeft, isResize } = dragState;
+    if (isResize) task.duration = Math.max(0, Math.round(parseFloat(bar.style.width) / dayWidth));
+    else {
+      const days = Math.round((parseFloat(bar.style.left) - origLeft) / dayWidth);
+      task.start = formatDate(addWorkingDays(parseDate(task.start), days));
+    }
+    dragState = null;
+    document.onmousemove = document.onmouseup = null;
+    pushHistory();
+    rescheduleAll();
+  };
+}
 
+// Zoom con rueda del ratón
+document.getElementById('rightPanel').addEventListener('wheel', e => {
+  if (currentView !== 'gantt') return;
+  if (e.ctrlKey) {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      if (scale === 'month') changeScale('week');
+      else if (scale === 'week') changeScale('day');
+    } else {
+      if (scale === 'day') changeScale('week');
+      else if (scale === 'week') changeScale('month');
+    }
+  }
+}, { passive: false });
+
+/* ========== RESTO DE FUNCIONES ========== */
+function showContextMenu(x, y) {
+  const m = document.getElementById('contextMenu');
+  m.style.left = x + 'px'; m.style.top = y + 'px'; m.style.display = 'block';
+}
+document.addEventListener('click', () => document.getElementById('contextMenu').style.display = 'none');
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
+  if (e.key === 'Delete') deleteSelected();
+  if (e.key === 'Insert') addTask();
+  if (e.key === 'F2') editSelected();
+});
+
+function addTask() {
+  const id = Math.max(0, ...tasks.map(t => t.id)) + 1;
+  tasks.push({
+    id, name: "Nueva tarea", duration: 5, start: formatDate(new Date()), percent: 0,
+    level: 0, summary: false, resource: "", preds: [], constraint: "ASAP", constraintDate: "",
+    notes: "", collapsed: false, critical: false, baselineStart: null, baselineDuration: null
+  });
+  selectedId = id; pushHistory(); render(); editSelected();
+}
+function editSelected() {
+  if (!selectedId) return alert('Selecciona una tarea');
+  const t = tasks.find(x => x.id === selectedId);
+  editingId = t.id;
+  document.getElementById('modalTitle').textContent = `Editar #${t.id}`;
+  document.getElementById('mName').value = t.name;
+  document.getElementById('mDuration').value = t.duration;
+  document.getElementById('mStart').value = t.start;
+  document.getElementById('mPercent').value = t.percent;
+  document.getElementById('mResource').value = t.resource || '';
+  document.getElementById('mConstraint').value = t.constraint || 'ASAP';
+  document.getElementById('mConstraintDate').value = t.constraintDate || '';
+  document.getElementById('mSummary').value = t.summary;
+  document.getElementById('mNotes').value = t.notes || '';
+  const pl = document.getElementById('predList');
+  pl.innerHTML = '';
+  (t.preds || []).forEach(p => addPredRow(p.id, p.type, p.lag));
+  document.getElementById('editModal').classList.add('show');
+}
+function addPredRow(id = '', type = 'FS', lag = 0) {
+  const div = document.createElement('div');
+  div.className = 'pred-row';
+  div.innerHTML = `
+    <input type="number" placeholder="ID" value="${id}" style="width:70px">
+    <select>
+      <option value="FS" ${type==='FS'?'selected':''}>FS</option>
+      <option value="SS" ${type==='SS'?'selected':''}>SS</option>
+      <option value="FF" ${type==='FF'?'selected':''}>FF</option>
+      <option value="SF" ${type==='SF'?'selected':''}>SF</option>
+    </select>
+    <input type="number" placeholder="Lag" value="${lag}" style="width:60px">
+    <button onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('predList').appendChild(div);
+}
+function saveTask() {
+  const t = tasks.find(x => x.id === editingId);
+  t.name = document.getElementById('mName').value;
+  t.duration = +document.getElementById('mDuration').value || 0;
+  t.start = document.getElementById('mStart').value;
+  t.percent = +document.getElementById('mPercent').value || 0;
+  t.resource = document.getElementById('mResource').value.trim();
+  t.constraint = document.getElementById('mConstraint').value;
+  t.constraintDate = document.getElementById('mConstraintDate').value;
+  t.summary = document.getElementById('mSummary').value === 'true';
+  t.notes = document.getElementById('mNotes').value;
+  t.preds = [];
+  document.querySelectorAll('#predList .pred-row').forEach(row => {
+    const inputs = row.querySelectorAll('input,select');
+    const pid = +inputs[0].value;
+    if (pid) t.preds.push({ id: pid, type: inputs[1].value, lag: +inputs[2].value || 0 });
+  });
+  closeModal(); pushHistory(); rescheduleAll();
+}
+function closeModal() { document.getElementById('editModal').classList.remove('show'); }
+function deleteSelected() {
+  if (!selectedId || !confirm('¿Eliminar tarea?')) return;
+  tasks = tasks.filter(t => t.id !== selectedId);
+  selectedId = null; pushHistory(); render();
+}
+function indentTask() { const t = tasks.find(x => x.id === selectedId); if (t && t.level < 4) { t.level++; pushHistory(); render(); } }
+function outdentTask() { const t = tasks.find(x => x.id === selectedId); if (t && t.level > 0) { t.level--; pushHistory(); render(); } }
+function toggleCollapse(id) { const t = tasks.find(x => x.id === id); t.collapsed = !t.collapsed; render(); }
+function toggleExpandAll(e) { tasks.forEach(t => { if (t.summary) t.collapsed = !e; }); render(); }
+function toggleMilestone() { const t = tasks.find(x => x.id === selectedId); if (!t) return; t.duration = t.duration === 0 ? 1 : 0; pushHistory(); render(); }
+function changeScale(v) { scale = v; document.getElementById('scaleSelect').value = v; render(); }
+function applyFilter(v) { currentFilter = v; render(); }
+function setBaseline() {
+  if (!confirm('¿Establecer Baseline?')) return;
+  tasks.forEach(t => { t.baselineStart = t.start; t.baselineDuration = t.duration; });
+  pushHistory(); render();
+}
+function switchView(v) {
+  currentView = v;
+  document.getElementById('ganttView').classList.toggle('hidden', v !== 'gantt');
+  document.getElementById('resourceView').classList.toggle('active', v === 'resources');
+  document.getElementById('calendarView').classList.toggle('active', v === 'calendar');
+  render();
+}
+function changeCalMonth(d) {
+  calMonth += d;
+  if (calMonth > 12) { calMonth = 1; calYear++; }
+  if (calMonth < 1) { calMonth = 12; calYear--; }
+  renderCalendar();
+}
+function toggleFullScreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+function showTooltip(e, t) {
+  const tip = document.getElementById('tooltip');
+  const pred = (t.preds || []).map(p => `#${p.id} ${p.type}${p.lag ? ((p.lag > 0 ? '+' : '') + p.lag + 'd') : ''}`).join(', ') || 'Ninguna';
+  tip.innerHTML = `<b>${t.name}</b><br>${t.start} → ${formatDate(getFinish(t))} (${t.duration}d)<br>
+    Avance: ${t.percent}% | Recurso: ${t.resource || '—'}<br>
+    Predecesoras: ${pred}<br>
+    Holgura: ${t.totalSlack ?? '-'} (Libre: ${t.freeSlack ?? '-'})
+    ${t.notes ? '<br><br><i>' + t.notes + '</i>' : ''}`;
+  tip.style.display = 'block';
+  tip.style.left = (e.clientX + 14) + 'px';
+  tip.style.top = (e.clientY + 14) + 'px';
+}
+function hideTooltip() { document.getElementById('tooltip').style.display = 'none'; }
+function saveData() {
+  localStorage.setItem('wellmont-ultra', JSON.stringify(tasks));
+  document.getElementById('status').textContent = 'Guardado ' + new Date().toLocaleTimeString();
+}
 function loadData() {
-  const s = localStorage.getItem('wellmont-cpm');
+  const s = localStorage.getItem('wellmont-ultra');
   if (s) {
     tasks = JSON.parse(s);
+    document.getElementById('status').textContent = 'Datos restaurados';
   } else {
-    // Datos de ejemplo mínimos
+    // Datos de ejemplo WELLMONT
     tasks = [
-      {id:1, name:"Notice to Proceed", duration:0, start:"2019-06-03", percent:100, level:0, summary:false, resource:"Project Manager", preds:[], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false},
-      {id:2, name:"Project Start", duration:0, start:"2019-06-04", percent:100, level:0, summary:false, resource:"Project Manager", preds:[{id:1,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false},
-      {id:4, name:"Mobilization", duration:10, start:"2019-06-05", percent:100, level:0, summary:false, resource:"Site Team", preds:[{id:2,type:"FS",lag:0}], constraint:"ASAP", constraintDate:"", collapsed:false, critical:false}
+      {id:1,name:"Notice to Proceed",duration:0,start:"2019-06-03",percent:100,level:0,summary:false,resource:"Project Manager",preds:[],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:2,name:"Project Start",duration:0,start:"2019-06-04",percent:100,level:0,summary:false,resource:"Project Manager",preds:[{id:1,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:3,name:"Project Complete",duration:0,start:"2019-09-10",percent:0,level:0,summary:false,resource:"",preds:[{id:22,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true},
+      {id:4,name:"Mobilization",duration:10,start:"2019-06-05",percent:100,level:0,summary:false,resource:"Site Team",preds:[{id:2,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:5,name:"Construction",duration:51,start:"2019-06-24",percent:60,level:0,summary:true,resource:"",preds:[{id:4,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true},
+      {id:6,name:"Below Grade",duration:13,start:"2019-06-24",percent:100,level:1,summary:true,resource:"",preds:[],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:7,name:"Grade Site",duration:8,start:"2019-06-24",percent:100,level:2,summary:false,resource:"Civil Crew",preds:[],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:8,name:"Set Foundation",duration:9,start:"2019-06-24",percent:100,level:2,summary:false,resource:"Civil Crew",preds:[{id:7,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:9,name:"Dig Cable Trench",duration:4,start:"2019-07-08",percent:100,level:2,summary:false,resource:"Electrical",preds:[{id:8,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:10,name:"Above Grade",duration:20,start:"2019-07-11",percent:70,level:1,summary:true,resource:"",preds:[{id:6,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true},
+      {id:11,name:"Erect Steel Structures",duration:8,start:"2019-07-11",percent:100,level:2,summary:false,resource:"Steel Crew",preds:[],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true},
+      {id:12,name:"Install Equipment",duration:6,start:"2019-07-16",percent:80,level:2,summary:false,resource:"Mech. Team",preds:[{id:11,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:13,name:"Install Grounding",duration:2,start:"2019-07-25",percent:50,level:2,summary:false,resource:"Electrical",preds:[{id:12,type:"SS",lag:2}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:14,name:"Install Bus and Jumpers",duration:8,start:"2019-07-25",percent:40,level:2,summary:false,resource:"Electrical",preds:[{id:12,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true},
+      {id:15,name:"Lay Control Cable",duration:7,start:"2019-07-28",percent:30,level:2,summary:false,resource:"Electrical",preds:[{id:14,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true},
+      {id:16,name:"Fence",duration:14,start:"2019-07-28",percent:20,level:1,summary:true,resource:"",preds:[],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:17,name:"Install Fence",duration:7,start:"2019-07-28",percent:20,level:2,summary:false,resource:"Fence Crew",preds:[],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:18,name:"Site Restoration",duration:8,start:"2019-08-15",percent:0,level:1,summary:true,resource:"",preds:[{id:10,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true},
+      {id:19,name:"Remove Equipment",duration:5,start:"2019-08-15",percent:0,level:2,summary:false,resource:"Mech. Team",preds:[],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true},
+      {id:20,name:"Lay Storing",duration:2,start:"2019-07-16",percent:100,level:2,summary:false,resource:"Civil Crew",preds:[],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:21,name:"Lay Roadway",duration:4,start:"2019-07-18",percent:100,level:2,summary:false,resource:"Civil Crew",preds:[{id:20,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:false},
+      {id:22,name:"Project Closeout",duration:10,start:"2019-08-26",percent:0,level:0,summary:true,resource:"",preds:[{id:18,type:"FS",lag:0}],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true},
+      {id:23,name:"Substantial Completion",duration:10,start:"2019-08-26",percent:0,level:1,summary:false,resource:"Project Manager",preds:[],constraint:"ASAP",constraintDate:"",notes:"",collapsed:false,critical:true}
     ];
   }
   history = [JSON.stringify(tasks)];
